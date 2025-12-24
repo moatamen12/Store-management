@@ -22,7 +22,7 @@
 
                 <div class="container-fluid p-4">
                     <!-- Users Card (fixed structure) -->
-                    <div class="card border-0 shadow-lg">
+                    <div class="card border-0 ">
                         <div class="card-header --bs-secondary-bg-rgb">
                             <div class="row align-items-center">
                                 <div class="col-md-3">
@@ -69,8 +69,13 @@
                                     <td th:text = "${user.email}"></td>
                                     <td th:text = "${user.role}"><span class="badge bg-info"></span></td>
                                     <td>
-                                        <button class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></button>
-                                        <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                                        <a th:href="@{/admin/editUser/{id}(id=${user.id})}" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></a>
+                                        <form th:action="@{/admin/deleteUser/{id}(id=${user.id})}" method="post" style="display:inline;">
+                                            <input type="hidden" name="_method" value="delete"/>
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?');">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                                 </tbody>

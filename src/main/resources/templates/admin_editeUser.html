@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="flex-grow-1 " style="margin-left:250px; padding:2rem;">
+    <h3>Edit User</h3>
+    <form th:action="@{/admin/editUser/{id}(id=${user.id})}" th:object="${user}" method="post" class="row justify-content-start">
+
+        <div class="col-6 mb-3">
+            <label class="form-label">First Name</label>
+            <input name="prenom" class="form-control" placeholder="Enter the User First Name" required th:field="*{prenom}"/>
+            <div th:if="${#fields.hasErrors('prenom')}" th:errors="*{prenom}" class="text-danger"></div>
+        </div>
+
+        <div class="col-6 mb-3">
+            <label class="form-label">Last Name</label>
+            <input name="nom" class="form-control" placeholder="Enter the User Last Name" required th:field="*{nom}"/>
+            <div th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}" class="text-danger"></div>
+        </div>
+
+        <div class="col-6 mb-3">
+            <label class="form-label">Email</label>
+            <input name="email" type="email" class="form-control" placeholder="Enter the User Email" required th:field="*{email}"/>
+            <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger"></div>
+        </div>
+
+        <div class="col-6 mb-3">
+            <label for="password" class="form-label fw-semibold">Password</label>
+            <div class="input-group">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" th:field="*{password}"/>
+                <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger"></div>
+                <button class="btn btn-info" type="button" id="togglePassword">
+                    <i class="bi bi-eye" id="toggleIcon"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="col-6 mb-3">
+            <label class="form-label">Role</label>
+            <select th:field="*{role}" name="role" class="form-select" required>
+                <option value="" disabled>Select a role</option>
+                <option value="Admin">ADMIN</option>
+                <option value="magasinier">MAGASINIER</option>
+                <option value="Secretaire_General">Secretaire_General</option>
+                <option value="demandeur">demandeur</option>
+            </select>
+            <div th:if="${#fields.hasErrors('role')}" th:errors="*{role}" class="text-danger"></div>
+        </div>
+
+        <div class="col-6 text-end">
+            <button type="submit" class="btn btn-primary me-2">Update</button>
+            <a th:href="@{/admin}" class="btn btn-danger me-2">Cancel</a>
+        </div>
+    </form>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script>
+    const togglePassword = document.getElementById('togglePassword');
+    const password = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggleIcon');
+
+    togglePassword.addEventListener('click', function () {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        toggleIcon.classList.toggle('bi-eye');
+        toggleIcon.classList.toggle('bi-eye-slash');
+    });
+</script>
+</body>
+</html>

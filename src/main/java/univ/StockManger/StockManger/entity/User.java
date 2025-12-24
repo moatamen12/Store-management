@@ -2,6 +2,7 @@ package univ.StockManger.StockManger.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Check;
@@ -20,23 +21,27 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
-        protected Long id;
+    protected Long id;
 
     @Column(nullable = false, unique = true)
     @NotEmpty
     private String email;
 
     @Column(nullable = false)
+    @NotEmpty
     private String password;
 
     @Column(nullable = false)
+    @NotEmpty
     private String nom;
 
     @Column(nullable = false)
+    @NotEmpty
     private String prenom;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @NotNull
     private Role role;
 
 
