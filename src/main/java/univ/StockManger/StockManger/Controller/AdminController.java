@@ -1,10 +1,9 @@
 package univ.StockManger.StockManger.Controller;
 
 
-//import org.springframework.stereotype.Controller;
-import jakarta.validation.Valid;
-//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import jakarta.validation.Valid;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -15,11 +14,11 @@ import univ.StockManger.StockManger.entity.User;
 public class AdminController {
 
     private final UserRepository userRepository;
-//    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    public AdminController(UserRepository userRepository) {
+    public AdminController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-//        this.passwordEncoder = passwordEncoder;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/admin")
@@ -42,7 +41,7 @@ public class AdminController {
         if (result.hasErrors()) {
             return "admin_addUser";
         }
-//        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));  // Uncomment and use this
         userRepository.save(user);
         return "redirect:/admin";
     }
@@ -69,21 +68,16 @@ public class AdminController {
             user.setId(id);
             return "admin_editeUser";
         }
-        if (user.getPassword() == null){
-              User existingUser = userRepository.findById(id).orElseThrow();
-              user.setPassword(existingUser.getPassword());
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            User existingUser = userRepository.findById(id).orElseThrow();
+            user.setPassword(existingUser.getPassword());
+        } else {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));  // Uncomment and use this
         }
-
-//        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-//            user.setPassword(passwordEncoder.encode(user.getPassword()));
-//        } else {
-//            // Retain existing password if not updating
-//            User existingUser = userRepository.findById(id).orElseThrow();
-//            user.setPassword(existingUser.getPassword());
-//        }
         userRepository.save(user);
         return "redirect:/admin";
     }
+
 
 
 /*

@@ -42,10 +42,10 @@
                     <label class="form-label">Role</label>
                     <select th:field="*{role}" name="role" class="form-select" required>
                         <option value="" disabled selected>Select a role</option>
-                        <option value="Admin">ADMIN</option>
-                        <option value="magasinier">MAGASINIER</option>
-                        <option value="Secretaire_General">Secretaire_General</option>
-                        <option value="demandeur">demandeur</option>
+                        <option th:value="'Admin'">ADMIN</option>
+                        <option th:value="'magasinier'">MAGASINIER</option>
+                        <option th:value="'Secretaire_General'">SECRETAIRE_GENERAL</option>
+                        <option th:value="'demandeur'">DEMANDEUR</option>
                     </select>
                     <div th:if="${#fields.hasErrors('role')}" th:errors="*{role}" class="text-danger"></div>
                 </div>

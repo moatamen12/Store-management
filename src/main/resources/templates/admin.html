@@ -32,13 +32,7 @@
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                        <input type="text" class="form-control" id="searchInput" placeholder="Search users...">
-                                        <select class="form-select" id="searchFilter" style="max-width: 130px;">
-                                            <option value="all">All Fields</option>
-                                            <option value="name">Name</option>
-                                            <option value="email">Email</option>
-                                            <option value="role">Role</option>
-                                        </select>
+                                        <input type="text" class="form-control" id="searchInput" placeholder="Search users by Name\Email\Role...">
                                         <button class="btn btn-primary" type="button" id="searchBtn">
                                             <i class="bi bi-search"></i>
                                         </button>
@@ -89,15 +83,13 @@
 
 <!--     add a user -->
         <div th:replace="fragments/footer :: footer"></div>
-        <!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>-->
+
         <script>
             const searchInput = document.getElementById('searchInput');
-            const searchFilter = document.getElementById('searchFilter');
             const searchBtn = document.getElementById('searchBtn');
             const tableBody = document.querySelector('table tbody');
 
             function filterTable() {
-                const filter = searchFilter.value;
                 const searchTerm = (searchInput.value || '').toLowerCase();
                 const rows = tableBody ? tableBody.querySelectorAll('tr') : [];
 
@@ -106,17 +98,7 @@
                     const email = (row.cells[2].textContent || '').toLowerCase();
                     const role = (row.cells[3].textContent || '').toLowerCase();
 
-                    let match = false;
-                    if (filter === 'all') {
-                        match = name.includes(searchTerm) || email.includes(searchTerm) || role.includes(searchTerm);
-                    } else if (filter === 'name') {
-                        match = name.includes(searchTerm);
-                    } else if (filter === 'email') {
-                        match = email.includes(searchTerm);
-                    } else if (filter === 'role') {
-                        match = role.includes(searchTerm);
-                    }
-
+                    const match = name.includes(searchTerm) || email.includes(searchTerm) || role.includes(searchTerm);
                     row.style.display = match ? '' : 'none';
                 });
             }
