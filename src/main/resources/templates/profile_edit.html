@@ -1,11 +1,14 @@
-<!-- html -->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/head :: head}"></head>
 <body>
 <div th:replace="~{fragments/header :: header}"></div>
 
-<main class="flex-grow-1" style="margin-left:250px; padding:2rem;">
+<!--<main class="flex-grow-1" style="margin-left:250px; padding:2rem;">-->
+<main class="flex-grow-1" style="margin-left:250px; padding:2rem; ">
+
+
+
     <h3>Edit Profile</h3>
     <form th:action="@{/profile/edit}" th:object="${user}" method="post" class="row g-3" style="max-width:800px;">
         <div class="col-md-6">
@@ -30,7 +33,12 @@
         <!-- Current password (required only when changing password) -->
         <div class="col-md-6">
             <label class="form-label">Current Password (required to change)</label>
-            <input type="password" name="currentPassword" id="currentPassword" class="form-control" placeholder="Current password" />
+            <div class="input-group">
+                <input type="password" name="currentPassword" id="currentPassword" class="form-control" placeholder="Current password" />
+                <button class="btn btn-info" type="button" id="toggleCurrentPassword">
+                    <i class="bi bi-eye" id="toggleCurrentIcon"></i>
+                </button>
+            </div>
             <div th:if="${passwordError != null}" class="text-danger" th:text="${passwordError}"></div>
         </div>
 
@@ -55,6 +63,19 @@
 <div th:replace="~{fragments/footer :: footer}"></div>
 
 <script>
+    const toggleCurrentPassword = document.getElementById('toggleCurrentPassword');
+    const currentPassword = document.getElementById('currentPassword');
+    const toggleCurrentIcon = document.getElementById('toggleCurrentIcon');
+    if (toggleCurrentPassword) {
+        toggleCurrentPassword.addEventListener('click', function () {
+            if (!currentPassword) return;
+            const type = currentPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            currentPassword.setAttribute('type', type);
+            toggleCurrentIcon.classList.toggle('bi-eye');
+            toggleCurrentIcon.classList.toggle('bi-eye-slash');
+        });
+    }
+
     const togglePassword = document.getElementById('togglePassword');
     const password = document.getElementById('password');
     const toggleIcon = document.getElementById('toggleIcon');

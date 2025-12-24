@@ -1,6 +1,7 @@
 package univ.StockManger.StockManger.Controller;
 
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import jakarta.validation.Valid;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -10,20 +11,35 @@ import org.springframework.web.bind.annotation.*;
 import univ.StockManger.StockManger.Repositories.UserRepository;
 import univ.StockManger.StockManger.entity.User;
 
+import java.security.Principal;
+
 @Controller
 public class AdminController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    //giting the current loggedin user
+    private User currentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email).orElseThrow();
+    }
+
+
     public AdminController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
+
+
     @GetMapping("/admin")
     public String adminDashboard(Model model) {
+//        String username = (principal != null) ? principal.getName() : "Guest";
+//        model.addAttribute("user", currentUser());
+        model.addAttribute("currentUser", currentUser().getPrenom() + " " + currentUser().getNom());
         model.addAttribute("users",userRepository.findAll());
+
         return "admin";
     }
 

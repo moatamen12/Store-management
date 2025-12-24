@@ -4,7 +4,10 @@
 <body>
 <div th:replace="~{fragments/header :: header}"></div>
 
-<main class="flex-grow-1 " style="margin-left:250px; padding:2rem;">
+<!--<main class="flex-grow-1 " style="margin-left:250px; padding:2rem;">-->
+<main class="flex-grow-1" style="margin-left:250px; padding:2rem;">
+
+
     <h3>Edit User</h3>
     <form th:action="@{/admin/editUser/{id}(id=${user.id})}" th:object="${user}" method="post" class="row justify-content-start">
 

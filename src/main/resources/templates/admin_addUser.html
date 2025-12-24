@@ -2,10 +2,14 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
     <head th:replace="~{fragments/head :: head}"></head>
+
     <body>
         <div th:replace="~{fragments/header :: header}"></div>
 
-        <main class="flex-grow-1 " style="margin-left:250px; padding:2rem;">
+<!--        <main class="flex-grow-1 " style="margin-left:250px; padding:2rem;">-->
+        <main class="flex-grow-1 " style="margin-left:250px; padding:2rem; ">
+
+
             <h3>Add User</h3>
             <form th:action="@{/admin/addUser}" th:object="${user}" method="post" class="row justify-content-start">
 

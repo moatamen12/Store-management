@@ -11,15 +11,10 @@
 <!--    main page-->
         <div class="d-flex">
             <!-- Sidebar -->
-            <div th:replace="fragments/header :: header"></div>
+            <div th:replace="~{fragments/header :: header}"></div>
             <!-- Main Content -->
-            <main class="flex-grow-1 bg-white" style="margin-left: 250px;">
-                <!-- Top Bar -->
-                <header class="bg-white shadow-sm p-3 d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">Dashboard</h3>
-                    <span class="text-muted">Welcome, Admin</span>
-                </header>
-
+            <main class="flex-grow-1 bg-white" style="margin-left: 250px; ">
+<!--            <main class="flex-grow-1 bg-white" style="margin-left: 250px;">-->
                 <div class="container-fluid p-4">
                     <!-- Users Card (fixed structure) -->
                     <div class="card border-0 ">
@@ -82,8 +77,8 @@
         </div> <!-- /.d-flex -->
 
 <!--     add a user -->
-        <div th:replace="fragments/footer :: footer"></div>
-
+<!--        <div th:replace="fragments/footer :: footer"></div>-->
+<div th:replace="~{fragments/footer :: footer}"></div>
         <script>
             const searchInput = document.getElementById('searchInput');
             const searchBtn = document.getElementById('searchBtn');

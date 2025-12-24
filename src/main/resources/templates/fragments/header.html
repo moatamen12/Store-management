@@ -5,7 +5,12 @@
     </div>
     <ul class="nav flex-column">
         <li class="nav-item">
-            <a class="nav-link text-white active bg-primary rounded" th:href="@{/admin}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+            <a class="nav-link text-white"
+               th:href="@{/admin}"
+               th:classappend="${activePage == 'admin'} ? ' active bg-primary rounded' : ''">
+                <i class="bi bi-speedometer2 me-2"></i>Dashboard
+            </a>
+<!--            <a class="nav-link text-white active bg-primary rounded" th:href="@{/admin}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>-->
         </li>
 
         <li class="nav-item">
