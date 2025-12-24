@@ -11,6 +11,8 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class Demandeur extends User {
+//    @Column(name = "demandeurID")
+//    private long demandeurID;
 
     @OneToMany(mappedBy = "demandeur", cascade = CascadeType.ALL)
     private List<Demandes> demandes = new ArrayList<>();

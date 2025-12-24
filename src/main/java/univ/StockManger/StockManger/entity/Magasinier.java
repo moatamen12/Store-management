@@ -12,6 +12,9 @@ import java.util.List;
 @Setter
 public class Magasinier extends User {
 
+//    @Column(name = "MagasinierID")
+//    private long MagasinierID;
+
     @OneToMany(mappedBy = "magasinier", cascade = CascadeType.ALL)
     private List<Bon> bons = new ArrayList<>();
 

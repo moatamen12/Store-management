@@ -8,17 +8,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "Demandes")
+@Table(name = "demandes") // Standardized to lowercase
 @Getter
 @Setter
-@Check(constraints = "EtatDemande IN ('PENDING', 'DELIVERED', 'APPROVED', 'REJECTED')")
+//@Check(constraints = "etat_demande IN ('PENDING', 'DELIVERED', 'APPROVED', 'REJECTED')")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Demandes {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long demandeID;
+    @Column(name = "id", updatable = false, nullable = false)
+    private Long id; // Standardized PK name
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "demandeur_id", nullable = false)
@@ -27,9 +28,9 @@ public class Demandes {
     @Column(nullable = false)
     private LocalDate date;
 
-
-    @Column(name = "EtatDemande", nullable = false)
-    private String EtatDemande;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "etat_demande", nullable = false)
+    private RequestStatus etat_demande;
 
     private String commentaire;
 
@@ -39,4 +40,13 @@ public class Demandes {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "validated_by_id")
     private SecretaireGeneral validatedBy;
+
+    @PrePersist
+    private void prePersist() {
+        if (etat_demande == null) {
+            etat_demande = RequestStatus.PENDING;
+        }
+    }
+
+
 }

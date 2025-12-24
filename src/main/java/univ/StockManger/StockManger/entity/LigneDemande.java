@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "LigneDemande")
+@Table(name = "lignes_demande")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,6 +13,7 @@ public class LigneDemande {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", updatable = false, nullable = false)
     private Long id;
 
     @Column(nullable = false)

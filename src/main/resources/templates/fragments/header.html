@@ -1,0 +1,35 @@
+<!-- src/main/resources/templates/fragments/header.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <body>
+        <nav th:fragment="header" class="bg-dark text-white vh-100 p-3" style="width: 250px; position: fixed;">
+            <div class="text-center border-bottom border-secondary pb-3 mb-3">
+                <h4>Stock Manager</h4>
+                <small class="text-white">Admin Panel</small>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link text-white active bg-primary rounded" href="#"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="#"><i class="bi bi-people me-2"></i>Users</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="#"><i class="bi bi-box-seam me-2"></i>Products</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="#"><i class="bi bi-file-earmark-text me-2"></i>Requests</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="#"><i class="bi bi-bar-chart me-2"></i>Reports</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="#"><i class="bi bi-gear me-2"></i>Settings</a>
+                </li>
+            </ul>
+            <div class="mt-auto pt-3 border-top border-secondary">
+                <a href="/logout" class="btn btn-outline-light w-100"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>
+            </div>
+        </nav>
+    </body>
+</html>

@@ -13,6 +13,7 @@ public class LigneBon {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", updatable = false, nullable = false)
     private Long id;
 
     @Column(nullable = false)
@@ -23,8 +24,8 @@ public class LigneBon {
     private Produits produit;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "bonID")
-    private Bon bonSortie;
+    @JoinColumn(name = "bon_id")
+    private Bon bon;
 
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "bon_entree_id")
