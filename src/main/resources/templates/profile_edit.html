@@ -1,0 +1,72 @@
+<!-- html -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="flex-grow-1" style="margin-left:250px; padding:2rem;">
+    <h3>Edit Profile</h3>
+    <form th:action="@{/profile/edit}" th:object="${user}" method="post" class="row g-3" style="max-width:800px;">
+        <div class="col-md-6">
+            <label class="form-label">First Name</label>
+            <input name="prenom" class="form-control" required th:field="*{prenom}" />
+            <div th:if="${#fields.hasErrors('prenom')}" th:errors="*{prenom}" class="text-danger"></div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Last Name</label>
+            <input name="nom" class="form-control" required th:field="*{nom}" />
+            <div th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}" class="text-danger"></div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Email</label>
+            <input name="email" type="email" class="form-control" required th:field="*{email}" />
+            <div th:if="${emailError != null}" class="text-danger" th:text="${emailError}"></div>
+            <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger"></div>
+        </div>
+
+        <!-- Current password (required only when changing password) -->
+        <div class="col-md-6">
+            <label class="form-label">Current Password (required to change)</label>
+            <input type="password" name="currentPassword" id="currentPassword" class="form-control" placeholder="Current password" />
+            <div th:if="${passwordError != null}" class="text-danger" th:text="${passwordError}"></div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">New Password (leave blank to keep)</label>
+            <div class="input-group">
+                <input type="password" id="password" name="password" class="form-control" placeholder="New password" th:field="*{password}" />
+                <button class="btn btn-info" type="button" id="togglePassword">
+                    <i class="bi bi-eye" id="toggleIcon"></i>
+                </button>
+            </div>
+            <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger"></div>
+        </div>
+
+        <div class="col-12 text-end">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a th:href="@{/profile}" class="btn btn-danger">Cancel</a>
+        </div>
+    </form>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    const togglePassword = document.getElementById('togglePassword');
+    const password = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggleIcon');
+    if (togglePassword) {
+        togglePassword.addEventListener('click', function () {
+            if (!password) return;
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            toggleIcon.classList.toggle('bi-eye');
+            toggleIcon.classList.toggle('bi-eye-slash');
+        });
+    }
+</script>
+</body>
+</html>
