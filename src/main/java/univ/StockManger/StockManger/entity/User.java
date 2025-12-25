@@ -9,11 +9,11 @@ import org.hibernate.annotations.Check;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "users") // Standardized to lowercase
 @Inheritance(strategy = InheritanceType.JOINED)
-//@Check(constraints = "role IN ('SECRETAIRE_GENERAL', 'MAGASINIER', 'DEMANDEUR', 'ADMIN')")
 @Getter
 @Setter
 public class User {
@@ -38,6 +38,16 @@ public class User {
     @Column(nullable = false)
     @NotEmpty
     private String prenom;
+
+//    @ElementCollection(fetch = FetchType.EAGER)
+//    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "role")
+//    @NotEmpty
+//    private Set<Role> roles;
+//
+//    public Set<Role> getRoles() { return roles; }
+//    public void setRoles(Set<Role> roles) { this.roles = roles; }
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

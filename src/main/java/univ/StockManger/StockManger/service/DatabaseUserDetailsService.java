@@ -1,3 +1,4 @@
+// java
 package univ.StockManger.StockManger.service;
 
 import org.slf4j.Logger;
@@ -37,10 +38,7 @@ public class DatabaseUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("User has no role assigned: " + email);
         }
 
-        String roleName = user.getRole().name().toUpperCase();
-        String granted = "ROLE_" + roleName;
-        logger.info("Mapping role '{}' to authority '{}'", user.getRole(), granted);
-
+        String granted = "ROLE_" + user.getRole().name().toUpperCase();
         List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(granted));
 
         return org.springframework.security.core.userdetails.User.builder()

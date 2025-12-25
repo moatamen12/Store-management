@@ -23,19 +23,24 @@ public class StockMangerApplication {
 
     //security configuration
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   CustomAuthenticationSuccessHandler successHandler) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/css/**", "/js/**", "/images/**","/webjars/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/sg/**").hasRole("SECRETAIRE_GENERAL")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .usernameParameter("email")      // use the form field named "email"
                         .passwordParameter("password")
-                        .defaultSuccessUrl("/admin", true)
+                        .successHandler(successHandler)
                         .permitAll()
+                )
+                .exceptionHandling(ex -> ex
+                        .accessDeniedPage("/access-denied")
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")

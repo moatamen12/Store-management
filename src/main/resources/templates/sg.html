@@ -2,11 +2,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
     <head th:replace="~{fragments/head :: head}"></head>
     <body>
-<!--    main page-->
         <div class="d-flex">
-            <!-- Sidebar -->
             <div th:replace="~{fragments/header :: header}"></div>
-            <!-- Main Content -->
             <main class="flex-grow-1 bg-white" style="margin-left: 250px; ">
                 <div class="container-fluid p-4">
                     <!-- Users Card (fixed structure) -->
@@ -64,37 +61,11 @@
                             </table>
                         </div>
                     </div> <!-- /.card -->
-
                 </div> <!-- /.container-fluid -->
             </main>
-        </div> <!-- /.d-flex -->
+        </div>
 
-<!--     add a user -->
-<!--        <div th:replace="fragments/footer :: footer"></div>-->
-<div th:replace="~{fragments/footer :: footer}"></div>
-        <script>
-            const searchInput = document.getElementById('searchInput');
-            const searchBtn = document.getElementById('searchBtn');
-            const tableBody = document.querySelector('table tbody');
 
-            function filterTable() {
-                const searchTerm = (searchInput.value || '').toLowerCase();
-                const rows = tableBody ? tableBody.querySelectorAll('tr') : [];
-
-                rows.forEach(row => {
-                    const name = (row.cells[1].textContent || '').toLowerCase();
-                    const email = (row.cells[2].textContent || '').toLowerCase();
-                    const role = (row.cells[3].textContent || '').toLowerCase();
-
-                    const match = name.includes(searchTerm) || email.includes(searchTerm) || role.includes(searchTerm);
-                    row.style.display = match ? '' : 'none';
-                });
-            }
-
-            if (searchBtn) searchBtn.addEventListener('click', filterTable);
-            if (searchInput) searchInput.addEventListener('keyup', function(e) {
-                if (e.key === 'Enter') filterTable();
-            });
-        </script>
+        <div th:replace="~{fragments/footer :: footer}"></div>
     </body>
 </html>
