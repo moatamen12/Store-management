@@ -2,16 +2,14 @@ package univ.StockManger.StockManger.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Check;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "demandes") // Standardized to lowercase
+@Table(name = "demandes")
 @Getter
 @Setter
-//@Check(constraints = "etat_demande IN ('PENDING', 'DELIVERED', 'APPROVED', 'REJECTED')")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Demandes {
@@ -19,9 +17,10 @@ public class Demandes {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
-    private Long id; // Standardized PK name
+    private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    // EAGER so the view can read demandeur fields without LazyInitializationException
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "demandeur_id", nullable = false)
     private User demandeur;
 
@@ -34,10 +33,12 @@ public class Demandes {
 
     private String commentaire;
 
-    @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, orphanRemoval = true)
+    // EAGER so the view can iterate lines and access nested product fields
+    @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<LigneDemande> lignes = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    // EAGER to allow access to validator info in views without initializing proxy later
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "validated_by_id")
     private User validatedBy;
 
@@ -48,59 +49,3 @@ public class Demandes {
         }
     }
 }
-
-
-
-
-//package univ.StockManger.StockManger.entity;
-//
-//import jakarta.persistence.*;
-//import lombok.*;
-//import org.hibernate.annotations.Check;
-//import java.time.LocalDate;
-//import java.util.ArrayList;
-//import java.util.List;
-//
-//@Entity
-//@Table(name = "demandes") // Standardized to lowercase
-//@Getter
-//@Setter
-////@Check(constraints = "etat_demande IN ('PENDING', 'DELIVERED', 'APPROVED', 'REJECTED')")
-//@NoArgsConstructor
-//@AllArgsConstructor
-//public class Demandes {
-//
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @Column(name = "id", updatable = false, nullable = false)
-//    private Long id; // Standardized PK name
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "demandeur_id", nullable = false)
-//    private Demandeur demandeur;
-//
-//    @Column(nullable = false)
-//    private LocalDate date;
-//
-//    @Enumerated(EnumType.STRING)
-//    @Column(name = "etat_demande", nullable = false)
-//    private RequestStatus etat_demande;
-//
-//    private String commentaire;
-//
-//    @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<LigneDemande> lignes = new ArrayList<>();
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "validated_by_id")
-//    private SecretaireGeneral validatedBy;
-//
-//    @PrePersist
-//    private void prePersist() {
-//        if (etat_demande == null) {
-//            etat_demande = RequestStatus.PENDING;
-//        }
-//    }
-//
-//
-//}

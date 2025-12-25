@@ -13,7 +13,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "users") // Standardized to lowercase
-@Inheritance(strategy = InheritanceType.JOINED)
+//@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 public class User {
