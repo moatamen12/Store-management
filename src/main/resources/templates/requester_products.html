@@ -19,7 +19,33 @@
                        th:value="${search}">
                 <button type="submit" class="btn btn-primary">Search</button>
             </form>
-            <table class="table table-bordered shadow-sm">
+
+            <form th:action="@{/requester/request}" method="post">
+                <table class="table table-bordered shadow-sm">
+                    <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Name</th>
+                        <th>Quantity in Stock</th>
+                        <th>Quantity to Request</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="product, iterStat : ${products}">
+                        <td>
+                            <input type="checkbox" name="selectedProducts" th:value="${product.id}" th:attr="data-qty-id=${product.id}" />
+                        </td>
+                        <td th:text="${product.nom}"></td>
+                        <td th:text="${product.quantite}"></td>
+                        <td>
+                            <input type="number" th:name="'quantities[' + ${product.id} + ']'" min="1" max="999" value="1" class="form-control" style="width: 80px;" th:attr="id='qty-' + ${product.id}" />
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-primary">Request Selected Products</button>
+            </form>
+            <!--<table class="table table-bordered shadow-sm">
                 <thead>
                 <tr>
                     <th>Name</th>
@@ -40,7 +66,7 @@
                     </td>
                 </tr>
                 </tbody>
-            </table>
+            </table>-->
             <!-- Pagination controls -->
             <nav th:if="${totalPages > 1}">
                 <ul class="pagination">
@@ -64,5 +90,21 @@
     </main>
 </div>
 <div th:replace="~{fragments/footer :: footer}"></div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form[th\\:action="@{/requester/request}"]');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const checkboxes = form.querySelectorAll('input[type="checkbox"][name="selectedProducts"]');
+                checkboxes.forEach(cb => {
+                    const qtyInput = form.querySelector(`#qty-${cb.value}`);
+                    if (qtyInput && !cb.checked) {
+                        qtyInput.disabled = true;
+                    }
+                });
+            });
+        }
+    });
+</script>
 </body>
 </html>

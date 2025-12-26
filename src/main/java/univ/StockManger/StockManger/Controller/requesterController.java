@@ -16,6 +16,7 @@ import univ.StockManger.StockManger.Repositories.UserRepository;
 import univ.StockManger.StockManger.entity.*;
 
 import java.security.Principal;
+import java.util.Map;
 
 @Controller
 public class requesterController {
@@ -54,44 +55,63 @@ public class requesterController {
 
     @PostMapping("/requester/request")
     public String submitRequest(
-            @RequestParam("productId") Long productId,
-            @RequestParam("quantity") int quantity,
+            @RequestParam(value = "selectedProducts", required = false) Long[] productIds,
+            @RequestParam Map<String, String> allRequestParams,
             Principal principal,
             RedirectAttributes redirectAttributes) {
-        Produits product = produitsRepository.findById(productId).orElse(null);
-        if (product == null) {
-            redirectAttributes.addFlashAttribute("error", "Product not found.");
-            return "redirect:/requester/products";
-        }
-        if (quantity > product.getQuantite()) {
-            redirectAttributes.addFlashAttribute("error", "Requested quantity exceeds available stock.");
-            return "redirect:/requester/products";
-        }
-        // Subtract requested quantity from stock
-        product.setQuantite(product.getQuantite() - quantity);
-        produitsRepository.save(product);
 
-        // Find the current user
+        if (productIds == null || productIds.length == 0) {
+            redirectAttributes.addFlashAttribute("error", "No products selected.");
+            return "redirect:/requester/products";
+        }
+
         User user = userRepository.findByEmail(principal.getName()).orElse(null);
         if (user == null) {
             redirectAttributes.addFlashAttribute("error", "User not found.");
             return "redirect:/requester/products";
         }
 
-        // Create and save the Demandes entity (adjust fields as needed)
         Demandes demande = new Demandes();
         demande.setDemandeur(user);
-        demande.setEtat_demande(RequestStatus.PENDING); // or your default status
+        demande.setEtat_demande(RequestStatus.PENDING);
         demande.setDate(java.time.LocalDate.now());
-        LigneDemande ligne = new LigneDemande();
-        ligne.setProduit(product);
-        ligne.setQuantiteDemandee(quantity);
-        ligne.setDemande(demande);
-        demande.getLignes().add(ligne);
+
+        for (Long productId : productIds) {
+            String qtyStr = allRequestParams.get("quantities[" + productId + "]");
+            int requestedQty;
+            try {
+                requestedQty = Integer.parseInt(qtyStr);
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("error", "Invalid quantity for product ID " + productId);
+                return "redirect:/requester/products";
+            }
+
+            Produits product = produitsRepository.findById(productId).orElse(null);
+            if (product == null) {
+                redirectAttributes.addFlashAttribute("error", "Product not found.");
+                return "redirect:/requester/products";
+            }
+            if (requestedQty > product.getQuantite()) {
+                redirectAttributes.addFlashAttribute("error", "Requested quantity for " + product.getNom() + " exceeds available stock.");
+                return "redirect:/requester/products";
+            }
+
+            product.setQuantite(product.getQuantite() - requestedQty);
+            produitsRepository.save(product);
+
+            LigneDemande ligne = new LigneDemande();
+            ligne.setProduit(product);
+            ligne.setQuantiteDemandee(requestedQty);
+            ligne.setDemande(demande);
+            demande.getLignes().add(ligne);
+        }
 
         demandesRepository.save(demande);
 
         redirectAttributes.addFlashAttribute("success", "Request submitted successfully.");
         return "redirect:/requester/products";
     }
+
+
+
 }
