@@ -21,16 +21,24 @@ public class GlobalControllerAdvice {
     @ModelAttribute
     public void addCurrentUser(Model model) {
         try {
-            String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            Optional<User> u = userRepository.findByEmail(email);
-            if (u.isPresent()) {
-                User user = u.get();
-                model.addAttribute("currentUser", user.getPrenom() + " " + user.getNom());
-            } else {
-                model.addAttribute("currentUser", "Guest");
+            String email = null;
+            if (SecurityContextHolder.getContext().getAuthentication() != null) {
+                email = SecurityContextHolder.getContext().getAuthentication().getName();
             }
+            if (email != null) {
+                Optional<User> u = userRepository.findByEmail(email);
+                if (u.isPresent()) {
+                    User user = u.get();
+                    model.addAttribute("currentUser", user.getPrenom() + " " + user.getNom());
+                    model.addAttribute("currentUserEmail", user.getEmail());
+                    return;
+                }
+            }
+            model.addAttribute("currentUser", "Guest");
+            model.addAttribute("currentUserEmail", "");
         } catch (Exception e) {
             model.addAttribute("currentUser", "Guest");
+            model.addAttribute("currentUserEmail", "");
         }
     }
 }

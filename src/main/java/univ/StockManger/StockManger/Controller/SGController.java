@@ -1,3 +1,5 @@
+// java
+// File: `src/main/java/univ/StockManger/StockManger/Controller/SGController.java`
 package univ.StockManger.StockManger.Controller;
 
 import org.springframework.stereotype.Controller;
@@ -16,70 +18,59 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
-//@RequestMapping("/sg")
 public class SGController {
 
-    //adding the dependeses
-//    private final UserRepository userRepository;
-    private final DemandesRepository requistRrpository;
+    private final DemandesRepository demandesRepository;
 
-    public SGController(DemandesRepository requistRrpository) {
-//        this.userRepository = userRepository;
-        this.requistRrpository = requistRrpository;
+    public SGController(DemandesRepository demandesRepository) {
+        this.demandesRepository = demandesRepository;
     }
 
-    //get the requist list
     @GetMapping("/sg")
-    public String sgDashboard(Model model){
-//        model.addAttribute("requests",requistRrpository.findAll());
-        List<Demandes> requests = requistRrpository.findAll();
-        requests.sort(Comparator.comparing(d->d.getEtat_demande() != RequestStatus.PENDING));
-        model.addAttribute("requests", requests);
-        return "sg";
+    public String sgDashboard(Model model) {
+        return "sg_requists";
     }
 
-    //update requist status
-    //approve requist
+    // single handler for the requests page (removed duplicate mapping)
+    @GetMapping("/sg/requests")
+    public String sgRequests(Model model){
+        List<Demandes> requests = demandesRepository.findAll();
+        // put PENDING first (stable)
+        requests.sort(Comparator.comparing(d -> d.getEtat_demande() != RequestStatus.PENDING));
+        model.addAttribute("requests", requests);
+        return "sg_requists";
+    }
+
     @PostMapping("/sg/update/{id}/approve")
     public String approveRequest(@PathVariable Long id, RedirectAttributes redirectAttributes){
-        Optional<Demandes> opt = requistRrpository.findById(id);
+        Optional<Demandes> opt = demandesRepository.findById(id);
         if(opt.isPresent()){
             Demandes demande = opt.get();
             demande.setEtat_demande(RequestStatus.APPROVED);
-            requistRrpository.save(demande);
+            demandesRepository.save(demande);
             redirectAttributes.addFlashAttribute("success", "Request approved successfully.");
-        }else{
+        } else {
             redirectAttributes.addFlashAttribute("error", "Request not approved.");
         }
-        return "redirect:/sg";
+        return "redirect:/sg/requests";
     }
-    //reject requist
+
     @PostMapping("/sg/update/{id}/reject")
     public String rejectRequest(@PathVariable Long id,
                                 @RequestParam(required = false, name = "commentaire") String commentaire,
                                 RedirectAttributes redirectAttributes){
-        Optional<Demandes> opt = requistRrpository.findById(id);
+        Optional<Demandes> opt = demandesRepository.findById(id);
         if(opt.isPresent()){
             Demandes demande = opt.get();
             demande.setEtat_demande(RequestStatus.REJECTED);
             if(commentaire != null && !commentaire.trim().isEmpty()){
                 demande.setCommentaire(commentaire);
             }
-            requistRrpository.save(demande);
+            demandesRepository.save(demande);
             redirectAttributes.addFlashAttribute("success", "Request rejected successfully.");
-        }else{
+        } else {
             redirectAttributes.addFlashAttribute("error", "Request not rejected.");
         }
-        return "redirect:/sg";
+        return "redirect:/sg/requests";
     }
-
-
-    //sgDashboard
-    /*TODO
-    * display al requists
-    * validateRequest
-    * generateReports
-    *
-    *
-    * */
 }

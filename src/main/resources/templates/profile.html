@@ -10,11 +10,12 @@ File: src/main/resources/templates/profile.html
 
 
 <!--<main class="flex-grow-1" style="margin-left:250px; padding:2rem;">-->
-<main class="flex-grow-1" style="margin-left:250px; padding:2rem; ">
+<main class="flex-grow-1" style="margin-left:250px; ">
+<!--    <div th:replace="~{fragments/topbar :: topbar}"></div>-->
+    <div th:replace="~{fragments/topbar :: topbar(pageTitle='Profile')}"></div>
 
 
-
-    <div class="card  border-0" style="max-width:800px;">
+    <div class="card  border-0" style="max-width:800px; padding:2rem;">
 
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">My Profile</h5>

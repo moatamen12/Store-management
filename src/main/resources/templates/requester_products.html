@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<div class="d-flex">
+    <div th:replace="~{fragments/header :: header}"></div>
+    <main class="flex-grow-1 bg-white" style="margin-left: 250px;">
+        <div th:replace="~{fragments/topbar :: topbar(pageTitle='Product List')}"></div>
+<!--        messages-->
+        <div th:if="${success != null or error != null}" class="mb-3">
+            <div th:if="${success != null}" class="alert alert-success" th:text="${success}"></div>
+            <div th:if="${error != null}" class="alert alert-danger" th:text="${error}"></div>
+        </div>
+
+        <div class="container mt-4">
+            <h2>Available Products</h2>
+            <form class="mb-3 d-flex shadow-sm" method="get" th:action="@{/requester/products}">
+                <input type="text" name="search" class="form-control me-2" placeholder="Search by name"
+                       th:value="${search}">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+            <table class="table table-bordered shadow-sm">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Quantity in Stock</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${products}">
+                    <td th:text="${product.nom}"></td>
+                    <td th:text="${product.quantite}"></td>
+                    <td>
+                        <form th:action="@{/requester/request}" method="post">
+                            <input type="hidden" name="productId" th:value="${product.id}" />
+                            <input type="number" name="quantity" min="1" max="999" value="1" class="form-control" style="width: 80px; display: inline-block;" />
+                            <button type="submit" class="btn btn-primary btn-sm">Request</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <!-- Pagination controls -->
+            <nav th:if="${totalPages > 1}">
+                <ul class="pagination">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/requester/products(page=${currentPage - 1}, size=10, search=${search})}">Previous</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
+                        th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link"
+                           th:href="@{/requester/products(page=${i}, size=10, search=${search})}"
+                           th:text="${i + 1}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages-1} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/requester/products(page=${currentPage + 1}, size=10, search=${search})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </main>
+</div>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

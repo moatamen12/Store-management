@@ -1,0 +1,12 @@
+<div th:fragment="topbar" xmlns:th="http://www.thymeleaf.org">
+    <div >
+        <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded py-3">
+            <div>
+                <div class="fw-bolder fs-2"><strong th:text="${pageTitle != null ? pageTitle : 'Panel'}">Panel</strong></div>
+            </div>
+            <div class="text-end">
+                <small class="text-uppercase text-muted" th:text="${#dates.format(#dates.createNow(), 'EEEE, dd MMMM yyyy')}">Monday, 01 January 2025</small>
+            </div>
+        </div>
+    </div>
+</div>

@@ -24,6 +24,9 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             } else if (authority.getAuthority().equals("ROLE_SECRETAIRE_GENERAL")) {
                 response.sendRedirect("/sg");
                 return;
+            }else if (authority.getAuthority().equals("ROLE_DEMANDEUR")) {
+                response.sendRedirect("/requester");
+                return;
             }
             // Add more roles as needed, e.g., for "demandeur" or "magasinier"
         }
