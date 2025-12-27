@@ -1,44 +1,65 @@
-<!-- html
-File: src/main/resources/templates/profile.html
--->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head}"></head>
+<head th:replace="fragments/layout :: head"></head>
 <body>
-<div th:replace="~{fragments/header :: header}"></div>
+<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='My Profile')">
+    <div th:fragment="content">
 
+        <div th:replace="fragments/layout :: alertMessage"></div>
 
-
-<!--<main class="flex-grow-1" style="margin-left:250px; padding:2rem;">-->
-<main class="flex-grow-1" style="margin-left:250px; ">
-<!--    <div th:replace="~{fragments/topbar :: topbar}"></div>-->
-    <div th:replace="~{fragments/topbar :: topbar(pageTitle='Profile')}"></div>
-
-
-    <div class="card  border-0" style="max-width:800px; padding:2rem;">
-
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">My Profile</h5>
-            <a th:href="@{/profile/edit}" class="btn btn-sm btn-primary">Edit Profile</a>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-dark">My Profile</h2>
+                <p class="text-secondary mb-0">Manage your personal information and settings.</p>
+            </div>
         </div>
-        <div class="card-body">
-            <dl class="row">
-                <dt class="col-sm-3">First Name</dt>
-                <dd class="col-sm-9" th:text="${user.prenom}">First</dd>
 
-                <dt class="col-sm-3">Last Name</dt>
-                <dd class="col-sm-9" th:text="${user.nom}">Last</dd>
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="max-width: 800px;">
+            <div class="card-header bg-white border-bottom border-light p-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center me-3"
+                         style="width: 64px; height: 64px; font-size: 1.5rem; font-weight: bold;">
+                        <span th:text="${#strings.substring(user.prenom, 0, 1)}">U</span>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1" th:text="${user.prenom + ' ' + user.nom}">User Name</h4>
+                        <span class="badge rounded-pill px-3 py-2 fw-normal"
+                              th:classappend="${user.role == 'ADMIN' ? 'bg-danger-subtle text-danger border border-danger-subtle' :
+                                               (user.role == 'SECRETAIRE_GENERAL' ? 'bg-warning-subtle text-warning-emphasis border border-warning-subtle' :
+                                               'bg-success-subtle text-success border border-success-subtle')}"
+                              th:text="${user.role}">ROLE</span>
+                    </div>
+                    <div class="ms-auto">
+                        <a th:href="@{/profile/edit}" class="btn btn-outline-primary rounded-pill px-4">
+                            <i class="bi bi-pencil-square me-2"></i>Edit Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-                <dt class="col-sm-3">Email</dt>
-                <dd class="col-sm-9" th:text="${user.email}">email@example.com</dd>
+            <div class="card-body p-4">
+                <h6 class="text-uppercase text-muted small fw-bold mb-4" style="letter-spacing: 0.5px;">Account Details</h6>
 
-                <dt class="col-sm-3">Role</dt>
-                <dd class="col-sm-9" th:text="${user.role}">ROLE</dd>
-            </dl>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="small text-secondary mb-1">First Name</label>
+                        <div class="fw-medium text-dark fs-5" th:text="${user.prenom}">First</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small text-secondary mb-1">Last Name</label>
+                        <div class="fw-medium text-dark fs-5" th:text="${user.nom}">Last</div>
+                    </div>
+                    <div class="col-12">
+                        <label class="small text-secondary mb-1">Email Address</label>
+                        <div class="d-flex align-items-center p-3 bg-light rounded-3 border border-light">
+                            <i class="bi bi-envelope text-muted me-3 fs-5"></i>
+                            <span class="fw-medium text-dark" th:text="${user.email}">email@example.com</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</main>
-
-<div th:replace="~{fragments/footer :: footer}"></div>
+</div>
 </body>
 </html>

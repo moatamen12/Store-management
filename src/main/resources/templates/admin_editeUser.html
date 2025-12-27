@@ -1,66 +1,62 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head}"></head>
+<head th:replace="fragments/layout :: head"></head>
 <body>
-<div th:replace="~{fragments/header :: header}"></div>
+<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='Edit User')">
+    <div th:fragment="content">
 
-<!--<main class="flex-grow-1 " style="margin-left:250px; padding:2rem;">-->
-<main class="flex-grow-1" style="margin-left:250px; padding:2rem;">
-    <div th:replace="~{fragments/topbar :: topbar(pageTitle='Edit USer')}"></div>
+        <div th:replace="fragments/layout :: alertMessage"></div>
+            <h3>Edit User</h3>
+            <form th:action="@{/admin/editUser/{id}(id=${user.id})}" th:object="${user}" method="post" class="row justify-content-start">
 
+                <div class="col-6 mb-3">
+                    <label class="form-label">First Name</label>
+                    <input name="prenom" class="form-control" placeholder="Enter the User First Name" required th:field="*{prenom}"/>
+                    <div th:if="${#fields.hasErrors('prenom')}" th:errors="*{prenom}" class="text-danger"></div>
+                </div>
 
+                <div class="col-6 mb-3">
+                    <label class="form-label">Last Name</label>
+                    <input name="nom" class="form-control" placeholder="Enter the User Last Name" required th:field="*{nom}"/>
+                    <div th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}" class="text-danger"></div>
+                </div>
 
-    <h3>Edit User</h3>
-    <form th:action="@{/admin/editUser/{id}(id=${user.id})}" th:object="${user}" method="post" class="row justify-content-start">
+                <div class="col-6 mb-3">
+                    <label class="form-label">Email</label>
+                    <input name="email" type="email" class="form-control" placeholder="Enter the User Email" required th:field="*{email}"/>
+                    <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger"></div>
+                </div>
 
-        <div class="col-6 mb-3">
-            <label class="form-label">First Name</label>
-            <input name="prenom" class="form-control" placeholder="Enter the User First Name" required th:field="*{prenom}"/>
-            <div th:if="${#fields.hasErrors('prenom')}" th:errors="*{prenom}" class="text-danger"></div>
+                <div class="col-6 mb-3">
+                    <label for="password" class="form-label fw-semibold">Password</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" th:field="*{password}"/>
+                        <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger"></div>
+                        <button class="btn btn-info" type="button" id="togglePassword">
+                            <i class="bi bi-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-6 mb-3">
+                    <label class="form-label">Role</label>
+                    <select th:field="*{role}" name="role" class="form-select" required>
+                        <option th:value="'Admin'">ADMIN</option>
+                        <option th:value="'magasinier'">MAGASINIER</option>
+                        <option th:value="'Secretaire_General'">SECRETAIRE_GENERAL</option>
+                        <option th:value="'demandeur'">DEMANDEUR</option>
+                    </select>
+                    <div th:if="${#fields.hasErrors('role')}" th:errors="*{role}" class="text-danger"></div>
+                </div>
+
+                <div class="col-6 text-end">
+                    <button type="submit" class="btn btn-primary me-2">Update</button>
+                    <a th:href="@{/admin}" class="btn btn-danger me-2">Cancel</a>
+                </div>
+            </form>
         </div>
+    </div>
 
-        <div class="col-6 mb-3">
-            <label class="form-label">Last Name</label>
-            <input name="nom" class="form-control" placeholder="Enter the User Last Name" required th:field="*{nom}"/>
-            <div th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}" class="text-danger"></div>
-        </div>
-
-        <div class="col-6 mb-3">
-            <label class="form-label">Email</label>
-            <input name="email" type="email" class="form-control" placeholder="Enter the User Email" required th:field="*{email}"/>
-            <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger"></div>
-        </div>
-
-        <div class="col-6 mb-3">
-            <label for="password" class="form-label fw-semibold">Password</label>
-            <div class="input-group">
-                <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" th:field="*{password}"/>
-                <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger"></div>
-                <button class="btn btn-info" type="button" id="togglePassword">
-                    <i class="bi bi-eye" id="toggleIcon"></i>
-                </button>
-            </div>
-        </div>
-
-        <div class="col-6 mb-3">
-            <label class="form-label">Role</label>
-            <select th:field="*{role}" name="role" class="form-select" required>
-                <option th:value="'Admin'">ADMIN</option>
-                <option th:value="'magasinier'">MAGASINIER</option>
-                <option th:value="'Secretaire_General'">SECRETAIRE_GENERAL</option>
-                <option th:value="'demandeur'">DEMANDEUR</option>
-            </select>
-            <div th:if="${#fields.hasErrors('role')}" th:errors="*{role}" class="text-danger"></div>
-        </div>
-
-        <div class="col-6 text-end">
-            <button type="submit" class="btn btn-primary me-2">Update</button>
-            <a th:href="@{/admin}" class="btn btn-danger me-2">Cancel</a>
-        </div>
-    </form>
-</main>
-
-<div th:replace="~{fragments/footer :: footer}"></div>
 <script>
     const togglePassword = document.getElementById('togglePassword');
     const password = document.getElementById('password');

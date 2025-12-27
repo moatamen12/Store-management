@@ -21,11 +21,14 @@ public class Demandes {
 
     // EAGER so the view can read demandeur fields without LazyInitializationException
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "demandeur_id", nullable = false)
+    @JoinColumn(name = "demandeur_id", nullable = true)
     private User demandeur;
 
-    @Column(nullable = false)
-    private LocalDate date;
+    @Column(name = "request_date", nullable = false)
+    private LocalDate request_date;
+
+    @Column(name = "validation_date", nullable = false)
+    private LocalDate validation_date;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "etat_demande", nullable = false)

@@ -1,18 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head}"></head>
+<head th:replace="fragments/layout :: head"></head>
 <body>
-<!--    main page-->
-<div class="d-flex">
-    <!-- Sidebar -->
-    <div th:replace="~{fragments/header :: header}"></div>
-    <!-- Main Content -->
-    <main class="flex-grow-1 " style="margin-left: 250px; ">
-        <div th:replace="~{fragments/topbar :: topbar(pageTitle='Admin Panel')}"></div>
-            hi from requister dashboard do me muther fucker
-    </main>
+<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='demandeur Panel')">
+    <div th:fragment="content">
+        <div th:replace="fragments/layout :: alertMessage"></div>
+    </div>
 </div>
-
-<div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 </html>

@@ -74,7 +74,7 @@ public class requesterController {
         Demandes demande = new Demandes();
         demande.setDemandeur(user);
         demande.setEtat_demande(RequestStatus.PENDING);
-        demande.setDate(java.time.LocalDate.now());
+        demande.setRequest_date(java.time.LocalDate.now());
 
         for (Long productId : productIds) {
             String qtyStr = allRequestParams.get("quantities[" + productId + "]");

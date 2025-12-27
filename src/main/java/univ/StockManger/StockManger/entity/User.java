@@ -56,7 +56,7 @@ public class User {
 
 
     // From Demandeur
-    @OneToMany(mappedBy = "demandeur", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "demandeur")
     private List<Demandes> demandes = new ArrayList<>();
 
     // From SecretaireGeneral

@@ -1,18 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head}"></head>
+<head th:replace="fragments/layout :: head"></head>
 <body>
-<div class="d-flex">
-    <div th:replace="~{fragments/header :: header}"></div>
-    <main class="flex-grow-1 bg-white" style="margin-left: 250px;">
-        <div th:replace="~{fragments/topbar :: topbar(pageTitle='Product List')}"></div>
-<!--        messages-->
-        <div th:if="${success != null or error != null}" class="mb-3">
-            <div th:if="${success != null}" class="alert alert-success" th:text="${success}"></div>
-            <div th:if="${error != null}" class="alert alert-danger" th:text="${error}"></div>
-        </div>
+<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='Available Products')">
+    <div th:fragment="content">
+        <div th:replace="fragments/layout :: alertMessage"></div>
 
-        <div class="container mt-4">
             <h2>Available Products</h2>
             <form class="mb-3 d-flex shadow-sm" method="get" th:action="@{/requester/products}">
                 <input type="text" name="search" class="form-control me-2" placeholder="Search by name"
@@ -33,7 +26,7 @@
                     <tbody>
                     <tr th:each="product, iterStat : ${products}">
                         <td>
-                            <input type="checkbox" name="selectedProducts" th:value="${product.id}" th:attr="data-qty-id=${product.id}" />
+                            <input class="form-check-input" type="checkbox" name="selectedProducts" th:value="${product.id}" th:attr="data-qty-id=${product.id}"  style="width: 24px; height: 24px;" />
                         </td>
                         <td th:text="${product.nom}"></td>
                         <td th:text="${product.quantite}"></td>
@@ -45,28 +38,6 @@
                 </table>
                 <button type="submit" class="btn btn-primary">Request Selected Products</button>
             </form>
-            <!--<table class="table table-bordered shadow-sm">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Quantity in Stock</th>
-                    <th>Action</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="product : ${products}">
-                    <td th:text="${product.nom}"></td>
-                    <td th:text="${product.quantite}"></td>
-                    <td>
-                        <form th:action="@{/requester/request}" method="post">
-                            <input type="hidden" name="productId" th:value="${product.id}" />
-                            <input type="number" name="quantity" min="1" max="999" value="1" class="form-control" style="width: 80px; display: inline-block;" />
-                            <button type="submit" class="btn btn-primary btn-sm">Request</button>
-                        </form>
-                    </td>
-                </tr>
-                </tbody>
-            </table>-->
             <!-- Pagination controls -->
             <nav th:if="${totalPages > 1}">
                 <ul class="pagination">
@@ -87,9 +58,9 @@
                 </ul>
             </nav>
         </div>
-    </main>
+    </div>
 </div>
-<div th:replace="~{fragments/footer :: footer}"></div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.querySelector('form[th\\:action="@{/requester/request}"]');
