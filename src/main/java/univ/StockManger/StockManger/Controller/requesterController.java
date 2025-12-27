@@ -16,6 +16,7 @@ import univ.StockManger.StockManger.Repositories.UserRepository;
 import univ.StockManger.StockManger.entity.*;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -29,7 +30,19 @@ public class requesterController {
     private UserRepository userRepository;
 
     @GetMapping("/requester")
-    public String requesterDashboard() {
+    public String requesterDashboard(Model model, Principal principal) {
+        String email = principal.getName();
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        if (user != null) {
+            List<Demandes> requests = demandesRepository.findByDemandeur(user);
+            model.addAttribute("requests", requests);
+
+            model.addAttribute("pendingCount", requests.stream().filter(r -> r.getEtat_demande() == RequestStatus.PENDING).count());
+            model.addAttribute("approvedCount", requests.stream().filter(r -> r.getEtat_demande() == RequestStatus.APPROVED).count());
+            model.addAttribute("rejectedCount", requests.stream().filter(r -> r.getEtat_demande() == RequestStatus.REJECTED).count());
+            model.addAttribute("deliveredCount", requests.stream().filter(r -> r.getEtat_demande() == RequestStatus.DELIVERED).count());
+        }
         return "requester";
     }
 
@@ -111,7 +124,5 @@ public class requesterController {
         redirectAttributes.addFlashAttribute("success", "Request submitted successfully.");
         return "redirect:/requester/products";
     }
-
-
 
 }

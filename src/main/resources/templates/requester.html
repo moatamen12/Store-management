@@ -2,9 +2,121 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragments/layout :: head"></head>
 <body>
-<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='demandeur Panel')">
+<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='Requester Dashboard')">
     <div th:fragment="content">
         <div th:replace="fragments/layout :: alertMessage"></div>
+
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+            <!-- Pending -->
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-warning-subtle text-warning-emphasis rounded-circle p-3 me-3">
+                            <i class="bi bi-hourglass-split fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Pending</h6>
+                            <h3 class="fw-bold mb-0" th:text="${pendingCount}">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Approved -->
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-success-subtle text-success rounded-circle p-3 me-3">
+                            <i class="bi bi-check-circle fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Approved</h6>
+                            <h3 class="fw-bold mb-0" th:text="${approvedCount}">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Rejected -->
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-danger-subtle text-danger rounded-circle p-3 me-3">
+                            <i class="bi bi-x-circle fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Rejected</h6>
+                            <h3 class="fw-bold mb-0" th:text="${rejectedCount}">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Delivered -->
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-info-subtle text-info rounded-circle p-3 me-3">
+                            <i class="bi bi-box-seam fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Delivered</h6>
+                            <h3 class="fw-bold mb-0" th:text="${deliveredCount}">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requests List -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-white border-bottom border-light p-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-secondary"><i class="bi bi-list-ul me-2"></i>My Requests</h5>
+                <a th:href="@{/requester/products}" class="btn btn-primary rounded-pill px-4">
+                    <i class="bi bi-plus-lg me-2"></i>New Request
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                        <tr class="text-muted text-uppercase small" style="letter-spacing: 0.5px;">
+                            <th class="ps-4 py-3">ID</th>
+                            <th class="py-3">Date</th>
+                            <th class="py-3">Status</th>
+                            <th class="py-3">Products</th>
+                            <th class="py-3">Comment</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="request : ${requests}">
+                            <td class="ps-4 fw-semibold text-secondary" th:text="${request.id}">1</td>
+                            <td th:text="${request.request_date}">2023-01-01</td>
+                            <td>
+                                <span th:text="${request.etat_demande}"
+                                      th:class="${'badge rounded-pill ' + (request.etat_demande.name() == 'PENDING' ? 'bg-warning-subtle text-warning-emphasis border border-warning-subtle' : (request.etat_demande.name() == 'APPROVED' ? 'bg-success-subtle text-success border border-success-subtle' : (request.etat_demande.name() == 'REJECTED' ? 'bg-danger-subtle text-danger border border-danger-subtle' : 'bg-info-subtle text-info border border-info-subtle')))}">
+                                    PENDING
+                                </span>
+                            </td>
+                            <td>
+                                <ul class="list-unstyled mb-0">
+                                    <li th:each="line : ${request.lignes}">
+                                        <span th:text="${line.produit.nom}">Product</span>
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle ms-1" th:text="${'x' + line.quantiteDemandee}">x1</span>
+                                    </li>
+                                </ul>
+                            </td>
+                            <td class="text-muted small" th:text="${request.commentaire}"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(requests)}">
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                                No requests found. Start by creating a new request.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 </body>

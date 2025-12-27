@@ -26,7 +26,7 @@
                     <tbody>
                     <tr th:each="product, iterStat : ${products}">
                         <td>
-                            <input class="form-check-input" type="checkbox" name="selectedProducts" th:value="${product.id}" th:attr="data-qty-id=${product.id}"  style="width: 24px; height: 24px;" />
+                            <input class="form-check-input shadow-sm border-2" type="checkbox" name="selectedProducts" th:value="${product.id}" th:attr="data-qty-id=${product.id}"  style="width: 24px; height: 24px;" />
                         </td>
                         <td th:text="${product.nom}"></td>
                         <td th:text="${product.quantite}"></td>
