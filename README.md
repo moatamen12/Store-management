@@ -1,5 +1,6 @@
 StockManger - 
-A modern web-based solution for digitizing and managing the distribution of consumable products in university warehouses, developed as part of an academic project at Abdelhamid Ibn Badis University of Mostaganem.
+A modern web-based solution for digitizing and managing the distribution of consumable products in university warehouses, 
+
 📋 Table of Contents
 
 About
