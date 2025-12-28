@@ -58,9 +58,11 @@
                                                 <span class="badge bg-success text-white" th:text="${request.demande.etat_demande}">ACCEPTE_SG</span>
                                             </td>
                                             <td class="text-end pe-4">
-                                                <a th:href="@{/magasinier/request/{id}(id=${request.demande.id})}" class="btn btn-sm btn-primary">
-                                                    Create Exit Receipt
-                                                </a>
+                                                <form th:action="@{/magasinier/request/deliver/{id}(id=${request.demande.id})}" method="post" style="display:inline;">
+                                                    <button type="submit" class="btn btn-sm btn-outline-success" onclick="return confirm('Mark this request as delivered?');">
+                                                        <i class="bi bi-check-circle"></i> Confirm Delivery
+                                                    </button>
+                                                </form>
                                             </td>
                                         </tr>
                                         <tr th:if="${#lists.isEmpty(requests)}">

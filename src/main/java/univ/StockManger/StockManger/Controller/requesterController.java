@@ -2,6 +2,7 @@ package univ.StockManger.StockManger.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
@@ -18,6 +19,7 @@ import univ.StockManger.StockManger.Repositories.UserRepository;
 import univ.StockManger.StockManger.entity.*;
 
 import java.security.Principal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -39,12 +41,15 @@ public class requesterController {
 
         if (user != null) {
             List<Demandes> requests = demandesRepository.findTop10RecentForDemandeur(user.getId(), PageRequest.of(0, 10));
+            requests.sort(Comparator.comparing((Demandes d) -> d.getEtat_demande() != RequestStatus.PENDING)
+                    .thenComparing(Demandes::getRequest_date, Comparator.reverseOrder()));
             model.addAttribute("requests", requests);
 
-            model.addAttribute("pendingCount", requests.stream().filter(r -> r.getEtat_demande() == RequestStatus.PENDING).count());
-            model.addAttribute("approvedCount", requests.stream().filter(r -> r.getEtat_demande() == RequestStatus.APPROVED).count());
-            model.addAttribute("rejectedCount", requests.stream().filter(r -> r.getEtat_demande() == RequestStatus.REJECTED).count());
-            model.addAttribute("deliveredCount", requests.stream().filter(r -> r.getEtat_demande() == RequestStatus.DELIVERED).count());
+            long totalRequests = demandesRepository.countByDemandeurId(user.getId());
+            model.addAttribute("pendingCount", demandesRepository.countByDemandeurIdAndEtat_demande(user.getId(), RequestStatus.PENDING));
+            model.addAttribute("approvedCount", demandesRepository.countByDemandeurIdAndEtat_demande(user.getId(), RequestStatus.APPROVED));
+            model.addAttribute("rejectedCount", demandesRepository.countByDemandeurIdAndEtat_demande(user.getId(), RequestStatus.REJECTED));
+            model.addAttribute("deliveredCount", demandesRepository.countByDemandeurIdAndEtat_demande(user.getId(), RequestStatus.DELIVERED));
         }
         return "requester";
     }
@@ -65,9 +70,17 @@ public class requesterController {
             } else {
                 requestPage = demandesRepository.findByDemandeurIdOrderByRequest_dateDesc(user.getId(), pageable);
             }
-            model.addAttribute("requests", requestPage.getContent());
-            model.addAttribute("currentPage", requestPage.getNumber());
-            model.addAttribute("totalPages", requestPage.getTotalPages());
+
+            List<Demandes> sortedRequests = requestPage.getContent().stream()
+                    .sorted(Comparator.comparing((Demandes d) -> d.getEtat_demande() != RequestStatus.PENDING)
+                            .thenComparing(Demandes::getRequest_date, Comparator.reverseOrder()))
+                    .collect(Collectors.toList());
+
+            Page<Demandes> sortedPage = new PageImpl<>(sortedRequests, pageable, requestPage.getTotalElements());
+
+            model.addAttribute("requests", sortedPage.getContent());
+            model.addAttribute("currentPage", sortedPage.getNumber());
+            model.addAttribute("totalPages", sortedPage.getTotalPages());
             model.addAttribute("search", search);
         }
         return "requister_Requests";
