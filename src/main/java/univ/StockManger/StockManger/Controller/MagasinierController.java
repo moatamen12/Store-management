@@ -5,8 +5,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import univ.StockManger.StockManger.Repositories.DemandesRepository;
 import univ.StockManger.StockManger.Repositories.ProduitsRepository;
 import univ.StockManger.StockManger.entity.Demandes;
@@ -41,20 +39,6 @@ public class MagasinierController {
         }).collect(Collectors.toList());
         model.addAttribute("requests", requestViews);
 
-//        // Data for "Stock Management" tab
-//        model.addAttribute("products", produitsRepository.findAll());
-
         return "magasinier";
-    }
-
-    @GetMapping("/produit/delete/{id}")
-    public String deleteProduit(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
-        try {
-            produitsRepository.deleteById(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Product deleted successfully.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error deleting product.");
-        }
-        return "redirect:/stock";
     }
 }

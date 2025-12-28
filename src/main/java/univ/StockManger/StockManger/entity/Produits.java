@@ -4,7 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 @SQLDelete(sql = "UPDATE Produits SET deleted = true WHERE id=?")
 @Where(clause = "deleted=false")
+@EntityListeners(AuditingEntityListener.class)
 public class Produits {
 
     @Id
@@ -33,9 +39,20 @@ public class Produits {
 
     private double prixUnitaire;
 
+    private String description;
+
     @OneToMany(mappedBy = "produit")
     private List<LigneBon> lignesBon = new ArrayList<>();
 
     private boolean deleted = false;
+
+    @CreatedBy
+    private String createdBy;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
 
 }

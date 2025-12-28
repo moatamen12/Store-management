@@ -66,7 +66,7 @@
             </form>
         </div>
 
-        <!-- Admin, SG, Magasinier View -->
+        <!-- Admin, SG, MAGASINIER View -->
         <div sec:authorize="!hasRole('DEMANDEUR')">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
@@ -74,7 +74,7 @@
                     <p class="text-secondary mb-0">View and monitor product stock levels.</p>
                 </div>
                 <div sec:authorize="hasAnyRole('ADMIN', 'MAGASINIER', 'SG')">
-                    <a href="#" class="btn btn-primary fw-semibold">
+                    <a th:href="@{/produits/add}" class="btn btn-primary fw-semibold">
                         <i class="bi bi-plus-circle me-2"></i>Add New Product
                     </a>
                 </div>
@@ -127,13 +127,17 @@
                                     <span th:unless="${product.quantite <= product.seuilAlerte}" class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">In Stock</span>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <div sec:authorize="hasAnyRole('ADMIN', 'MAGASINIER', 'SG')">
-                                        <a href="#" class="btn btn-sm btn-outline-secondary">
+                                    <div sec:authorize="hasRole('MAGASINIER')">
+                                        <a th:href="@{/produits/edit/{id}(id=${product.id})}" class="btn btn-sm btn-outline-secondary">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <a href="#" class="btn btn-sm btn-outline-danger">
-                                            <i class="bi bi-trash"></i>
-                                        </a>
+                                        <form th:action="@{/produits/delete/{id}(id=${product.id})}" method="post" style="display: inline;">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                    th:disabled="${productsWithActiveRequests.contains(product.id)}"
+                                                    th:title="${productsWithActiveRequests.contains(product.id)} ? 'This product is part of an active request and cannot be deleted.' : 'Delete product'">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -190,3 +194,11 @@
 </script>
 </body>
 </html>
+
+<!--TODO
+    BONE ENTRE SORTE
+    RAPORTE
+    MODIFY A PRODUCTE
+    ADD  PROUCTE
+    PRODUCTE THRES HOLD
+    NOTIFICATIONS-->

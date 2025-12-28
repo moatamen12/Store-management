@@ -11,10 +11,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import univ.StockManger.StockManger.Repositories.ProduitsRepository;
 import univ.StockManger.StockManger.entity.Produits;
+import univ.StockManger.StockManger.entity.RequestStatus;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 @Controller
 public class StockController {
@@ -33,8 +36,6 @@ public class StockController {
                         @RequestParam(required = false) boolean lowStock,
                         Locale locale) {
 
-//        model.addAttribute("locale", locale);
-
         if (authentication != null && authentication.isAuthenticated()) {
             Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
             model.addAttribute("authorities", authorities);
@@ -50,11 +51,17 @@ public class StockController {
                 productPage = produitsRepository.findAll(pageable);
             }
 
+            List<Long> productsWithActiveRequests = productPage.getContent().stream()
+                .filter(p -> produitsRepository.countActiveRequestsForProductInStatus(p.getId(), Arrays.asList(RequestStatus.PENDING, RequestStatus.APPROVED)) > 0)
+                .map(Produits::getId)
+                .collect(Collectors.toList());
+
             model.addAttribute("products", productPage.getContent());
             model.addAttribute("currentPage", productPage.getNumber());
             model.addAttribute("totalPages", productPage.getTotalPages());
             model.addAttribute("search", search);
             model.addAttribute("lowStock", lowStock);
+            model.addAttribute("productsWithActiveRequests", productsWithActiveRequests);
         }
 
         return "stock";

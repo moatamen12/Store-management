@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head"></head>
+<body>
+<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='Ajouter Produit')">
+    <div th:fragment="content">
+        <div class="container">
+            <h2>Ajouter un nouveau produit</h2>
+            <form th:action="@{/produits/add}" th:object="${produit}" method="post">
+                <div class="form-group">
+                    <label for="nom">Nom:</label>
+                    <input type="text" class="form-control" id="nom" th:field="*{nom}" required>
+                </div>
+                <div class="form-group">
+                    <label for="quantite">Quantité:</label>
+                    <input type="number" class="form-control" id="quantite" th:field="*{quantite}" required>
+                </div>
+                <div class="form-group">
+                    <label for="seuilAlerte">Seuil d'Alerte:</label>
+                    <input type="number" class="form-control" id="seuilAlerte" th:field="*{seuilAlerte}">
+                </div>
+                <div class="form-group">
+                    <label for="prixUnitaire">Prix Unitaire:</label>
+                    <input type="number" step="0.01" class="form-control" id="prixUnitaire" th:field="*{prixUnitaire}">
+                </div>
+                <button type="submit" class="btn btn-primary">Ajouter</button>
+            </form>
+        </div>
+        <div th:replace="fragments/layout :: alertMessage"></div>
+    </div>
+</div>
+</body>
+</html>

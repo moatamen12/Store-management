@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head"></head>
+<body>
+<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='Edit Product')">
+    <div th:fragment="content">
+        <div class="container">
+            <div th:replace="fragments/layout :: alertMessage"></div>
+
+            <h2>Edit Product</h2>
+            <p>Use the form below to modify the product details.</p>
+            <form th:action="@{/produits/update/{id}(id=${produit.id})}" th:object="${produit}" method="post">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="nom">Name:</label>
+                            <input type="text" class="form-control" id="nom" th:field="*{nom}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="quantite">Quantity:</label>
+                            <input type="number" class="form-control" id="quantite" th:field="*{quantite}" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="seuilAlerte">Alert Threshold:</label>
+                            <input type="number" class="form-control" id="seuilAlerte" th:field="*{seuilAlerte}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="prixUnitaire">Unit Price:</label>
+                            <input type="number" step="0.01" class="form-control" id="prixUnitaire" th:field="*{prixUnitaire}">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea class="form-control" id="description" th:field="*{description}" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
