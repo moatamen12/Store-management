@@ -61,6 +61,7 @@ public class StockController {
             model.addAttribute("totalPages", productPage.getTotalPages());
             model.addAttribute("search", search);
             model.addAttribute("lowStock", lowStock);
+            model.addAttribute("size", size);
             model.addAttribute("productsWithActiveRequests", productsWithActiveRequests);
         }
 

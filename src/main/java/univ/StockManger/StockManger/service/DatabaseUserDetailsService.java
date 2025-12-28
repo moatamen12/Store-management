@@ -57,7 +57,7 @@ public class DatabaseUserDetailsService implements UserDetailsService {
 
         public long getId() {
             return user.getId();
-        }
+            }
 
         private static Collection<? extends GrantedAuthority> getAuthorities(User user) {
             String granted = "ROLE_" + user.getRole().name().toUpperCase();

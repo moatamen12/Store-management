@@ -88,7 +88,7 @@
         <div class="px-4 py-3 text-white-50 small">
             <div th:if="${currentUser != null}">
                 <i class="bi bi-person-circle me-1"></i>
-                <span th:text="${currentUser}">User</span>
+                <span th:text="${currentUser.prenom + ' ' + currentUser.nom}">User</span>
             </div>
         </div>
         <div class="flex-grow-1 overflow-auto">
@@ -98,7 +98,7 @@
                 <li class="nav-item"><a class="nav-link" th:href="@{/admin}"><i class="bi bi-grid me-2"></i>Dashboard</a></li>
             </ul>
             <!-- SG -->
-            <ul class="nav flex-column" sec:authorize="hasRole('SCRETAIRE_GENERAL')">
+            <ul class="nav flex-column" sec:authorize="hasRole('SECRETAIRE_GENERAL')">
                 <li class="px-4 py-2 text-uppercase text-white-50 small">Management</li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/sg}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/sg/requests}"><i class="bi bi-inbox me-2"></i>Requests</a></li>
@@ -122,9 +122,6 @@
                     </a>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/profile}"><i class="bi bi-person-gear me-2"></i>Profile</a>
-                </li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/profile}"><i class="bi bi-person-gear me-2"></i>Profile</a></li>
             </ul>
         </div>
@@ -194,10 +191,16 @@
 
     <script th:inline="javascript">
         /*<![CDATA[*/
-        // Get current user's ID from Spring Security context
-        const currentUserId = /*[[${#authentication.principal.id}]]*/ null;
+        const currentUserId = /*[[${currentUserId}]]*/ null;
+        const csrfToken = /*[[${_csrf.token}]]*/ null;
+        const csrfHeaderName = /*[[${_csrf.headerName}]]*/ null;
 
         document.addEventListener('DOMContentLoaded', function() {
+            const notificationDropdown = document.getElementById('notificationDropdown');
+            if (notificationDropdown) {
+                notificationDropdown.addEventListener('show.bs.dropdown', markNotificationsAsRead);
+            }
+
             // Auto-hide alerts
             setTimeout(function() {
                 var alerts = document.querySelectorAll('.alert.custom-alert');
@@ -256,10 +259,16 @@
 
             notificationList.innerHTML = ''; // Clear old list
 
-            if (notifications && notifications.length > 0) {
-                countSpan.textContent = notifications.length;
-                badge.style.display = 'inline-flex';
+            const unreadNotifications = notifications.filter(n => !n.isRead);
 
+            if (unreadNotifications && unreadNotifications.length > 0) {
+                countSpan.textContent = unreadNotifications.length;
+                badge.style.display = 'inline-flex';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            if (notifications && notifications.length > 0) {
                 notifications.forEach(n => {
                     const listItem = document.createElement('li');
                     const link = document.createElement('a');
@@ -280,9 +289,24 @@
                     notificationList.appendChild(listItem);
                 });
             } else {
-                badge.style.display = 'none';
                 if (placeholder) notificationList.appendChild(placeholder.cloneNode(true));
             }
+        }
+
+        function markNotificationsAsRead() {
+            fetch('/api/notifications/mark-as-read', {
+                method: 'POST',
+                headers: {
+                    [csrfHeaderName]: csrfToken
+                }
+            }).then(response => {
+                if (response.ok) {
+                    const badge = document.getElementById('notification-badge');
+                    if (badge) {
+                        badge.style.display = 'none';
+                    }
+                }
+            });
         }
 
         function showRealTimeToast(message) {

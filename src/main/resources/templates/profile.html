@@ -19,15 +19,15 @@
                 <div class="d-flex align-items-center">
                     <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center me-3"
                          style="width: 64px; height: 64px; font-size: 1.5rem; font-weight: bold;">
-                        <span th:text="${#strings.substring(user.prenom, 0, 1)}">U</span>
+                        <span th:text="${#strings.substring(profileUser.prenom, 0, 1)}">U</span>
                     </div>
                     <div>
-                        <h4 class="fw-bold text-dark mb-1" th:text="${user.prenom + ' ' + user.nom}">User Name</h4>
+                        <h4 class="fw-bold text-dark mb-1" th:text="${profileUser.prenom + ' ' + profileUser.nom}">User Name</h4>
                         <span class="badge rounded-pill px-3 py-2 fw-normal"
-                              th:classappend="${user.role == 'ADMIN' ? 'bg-danger-subtle text-danger border border-danger-subtle' :
-                                               (user.role == 'SECRETAIRE_GENERAL' ? 'bg-warning-subtle text-warning-emphasis border border-warning-subtle' :
+                              th:classappend="${profileUser.role == 'ADMIN' ? 'bg-danger-subtle text-danger border border-danger-subtle' :
+                                               (profileUser.role == 'SECRETAIRE_GENERAL' ? 'bg-warning-subtle text-warning-emphasis border border-warning-subtle' :
                                                'bg-success-subtle text-success border border-success-subtle')}"
-                              th:text="${user.role}">ROLE</span>
+                              th:text="${profileUser.role}">ROLE</span>
                     </div>
                     <div class="ms-auto">
                         <a th:href="@{/profile/edit}" class="btn btn-outline-primary rounded-pill px-4">
@@ -43,17 +43,17 @@
                 <div class="row g-4">
                     <div class="col-md-6">
                         <label class="small text-secondary mb-1">First Name</label>
-                        <div class="fw-medium text-dark fs-5" th:text="${user.prenom}">First</div>
+                        <div class="fw-medium text-dark fs-5" th:text="${profileUser.prenom}">First</div>
                     </div>
                     <div class="col-md-6">
                         <label class="small text-secondary mb-1">Last Name</label>
-                        <div class="fw-medium text-dark fs-5" th:text="${user.nom}">Last</div>
+                        <div class="fw-medium text-dark fs-5" th:text="${profileUser.nom}">Last</div>
                     </div>
                     <div class="col-12">
                         <label class="small text-secondary mb-1">Email Address</label>
                         <div class="d-flex align-items-center p-3 bg-light rounded-3 border border-light">
                             <i class="bi bi-envelope text-muted me-3 fs-5"></i>
-                            <span class="fw-medium text-dark" th:text="${user.email}">email@example.com</span>
+                            <span class="fw-medium text-dark" th:text="${profileUser.email}">email@example.com</span>
                         </div>
                     </div>
                 </div>

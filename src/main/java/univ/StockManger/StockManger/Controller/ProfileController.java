@@ -28,7 +28,7 @@ public class ProfileController {
 
     @GetMapping("/profile")
     public String profileView(Model model) {
-        model.addAttribute("user", currentUser());
+        model.addAttribute("profileUser", currentUser());
         return "profile";
     }
 
