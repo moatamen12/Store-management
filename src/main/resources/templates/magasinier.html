@@ -6,6 +6,34 @@
         <div th:fragment="content">
             <div th:replace="fragments/layout :: alertMessage"></div>
 
+            <!-- Statistic Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Products</h5>
+                            <p class="card-text fs-4 fw-bold">1,234</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Items in Stock</h5>
+                            <p class="card-text fs-4 fw-bold">5,678</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Pending Requests</h5>
+                            <p class="card-text fs-4 fw-bold" th:text="${#lists.size(requests)}">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                 <div class="card-header bg-white border-bottom border-light p-0">
                     <ul class="nav nav-tabs nav-fill border-0" id="dashboardTabs" role="tablist">
