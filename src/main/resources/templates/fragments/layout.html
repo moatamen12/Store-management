@@ -11,7 +11,7 @@
     <style>
         :root {
             --sidebar-width: 260px;
-            --sidebar-bg: #1e293b; /* Slate 800 */
+            --sidebar-bg: #1e293b;
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -64,7 +64,7 @@
         .custom-alert.alert-success { border-color: #198754; }
         .custom-alert.alert-danger { border-color: #dc3545; }
         .notification-badge {
-            display: none; /* Hidden by default */
+            display: none;
         }
         .notification-dropdown-item {
             white-space: normal;
@@ -79,9 +79,7 @@
 
 <body>
 
-<!-- This main fragment contains the whole page structure -->
 <div class="d-flex" th:fragment="main(content)">
-
     <!-- Sidebar -->
     <nav class="sidebar d-flex flex-column">
         <div class="sidebar-header text-white">
@@ -117,9 +115,16 @@
                 <li class="nav-item"><a class="nav-link" th:href="@{/magasinier}"><i class="bi bi-grid me-2"></i>Dashboard</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/magasinier/requests}"><i class="bi bi-inbox me-2"></i>Requests List</a></li>
             </ul>
-            <!-- Common Links -->
             <ul class="nav flex-column mt-2" sec:authorize="isAuthenticated()">
-                <li class="nav-item"><a class="nav-link" th:href="@{/stock}"><i class="bi bi-cart me-2"></i>Products List</a></li>
+                <li class="nav-item" sec:authorize="hasAnyRole('SECRETAIRE_GENERAL', 'DEMANDEUR', 'MAGASINIER')">
+                    <a class="nav-link" th:href="@{/stock}">
+                        <i class="bi bi-cart me-2"></i>Products List
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/profile}"><i class="bi bi-person-gear me-2"></i>Profile</a>
+                </li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/profile}"><i class="bi bi-person-gear me-2"></i>Profile</a></li>
             </ul>
         </div>
@@ -144,7 +149,6 @@
                 <div class="text-end me-4">
                     <small class="text-uppercase text-muted" th:text="${#dates.format(#dates.createNow(), 'EEEE, dd MMMM yyyy')}">Monday, 01 January 2025</small>
                 </div>
-                <!-- Notification Dropdown -->
                 <div class="dropdown">
                     <button class="btn btn-light position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-bell"></i>
@@ -184,47 +188,64 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- WebSocket Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
     <script th:inline="javascript">
         /*<![CDATA[*/
+        // Get current user's ID from Spring Security context
+        const currentUserId = /*[[${#authentication.principal.id}]]*/ null;
+
         document.addEventListener('DOMContentLoaded', function() {
             // Auto-hide alerts
             setTimeout(function() {
                 var alerts = document.querySelectorAll('.alert.custom-alert');
                 alerts.forEach(function(alert) {
-                    if (window.bootstrap) {
-                        new bootstrap.Alert(alert).close();
-                    }
+                    if (window.bootstrap) new bootstrap.Alert(alert).close();
                 });
             }, 4000);
 
-            // Fetch notifications when page loads
+            // Fetch initial notifications via REST
             fetchNotifications();
-            // Poll for new notifications every 30 seconds
-            setInterval(fetchNotifications, 30000);
+
+            // Connect to WebSocket if user is logged in
+            if (currentUserId) {
+                connectWebSocket();
+            }
         });
+
+        function connectWebSocket() {
+            const socket = new SockJS('/ws');
+            const stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                // Subscribe to the user-specific topic
+                stompClient.subscribe('/topic/notifications/' + currentUserId, function (notification) {
+                    console.log('Received notification:', notification);
+                    // When a new notification arrives, show a toast and refresh the list
+                    const notificationBody = JSON.parse(notification.body);
+                    showRealTimeToast(notificationBody.message);
+                    fetchNotifications(); // Re-fetch the list to update count and content
+                });
+            }, function(error) {
+                console.error('STOMP error: ' + error);
+                // Optional: try to reconnect after a delay
+                setTimeout(connectWebSocket, 10000);
+            });
+        }
 
         function fetchNotifications() {
             fetch('/api/notifications')
                 .then(response => {
-                    if (response.status === 401) { // Unauthorized
-                        console.log('User not authenticated. Halting notification checks.');
-                        return null;
-                    }
-                    if (!response.ok) {
-                        throw new Error('Server error fetching notifications');
-                    }
+                    if (!response.ok) return null;
                     return response.json();
                 })
                 .then(notifications => {
-                    if (notifications) {
-                        updateNotificationUI(notifications);
-                    }
+                    if (notifications) updateNotificationUI(notifications);
                 })
-                .catch(error => {
-                    console.error('Error fetching notifications:', error);
-                    const badge = document.getElementById('notification-badge');
-                    if(badge) badge.style.display = 'none';
-                });
+                .catch(error => console.error('Error fetching notifications:', error));
         }
 
         function updateNotificationUI(notifications) {
@@ -233,20 +254,17 @@
             const notificationList = document.getElementById('notification-list');
             const placeholder = document.getElementById('no-notifications-placeholder');
 
-            // Clear old notifications
-            notificationList.innerHTML = '';
+            notificationList.innerHTML = ''; // Clear old list
 
             if (notifications && notifications.length > 0) {
-                // Update count and show badge
                 countSpan.textContent = notifications.length;
                 badge.style.display = 'inline-flex';
 
-                // Add new notifications
                 notifications.forEach(n => {
                     const listItem = document.createElement('li');
                     const link = document.createElement('a');
                     link.className = 'dropdown-item notification-dropdown-item';
-                    link.href = '#'; // TODO: Make this link to the relevant item
+                    link.href = '#';
 
                     const message = document.createElement('div');
                     message.className = 'fw-bold';
@@ -261,14 +279,37 @@
                     listItem.appendChild(link);
                     notificationList.appendChild(listItem);
                 });
-
             } else {
-                // Hide badge and show placeholder
                 badge.style.display = 'none';
-                if (placeholder) {
-                    notificationList.appendChild(placeholder.cloneNode(true));
-                }
+                if (placeholder) notificationList.appendChild(placeholder.cloneNode(true));
             }
+        }
+
+        function showRealTimeToast(message) {
+            const toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+
+            const toastEl = document.createElement('div');
+            toastEl.className = 'toast';
+            toastEl.setAttribute('role', 'alert');
+            toastEl.setAttribute('aria-live', 'assertive');
+            toastEl.setAttribute('aria-atomic', 'true');
+
+            toastEl.innerHTML = `
+                <div class="toast-header">
+                    <i class="bi bi-bell-fill me-2"></i>
+                    <strong class="me-auto">New Notification</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            `;
+
+            toastContainer.appendChild(toastEl);
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
         }
         /*]]>*/
     </script>
