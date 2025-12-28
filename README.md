@@ -1,5 +1,5 @@
-StockManger - 
-A modern web-based solution for digitizing and managing the distribution of consumable products in university warehouses, 
+StockManger -
+A modern web-based solution for digitizing and managing the distribution of consumable products in university warehouses,
 
 📋 Table of Contents
 
@@ -61,12 +61,12 @@ The system follows a layered architecture with clear separation of concerns:
 │         Presentation Layer              │
 │   (Web Interface - NetBeans/JSP)        │
 └─────────────────────────────────────────┘
-                    │
+│
 ┌─────────────────────────────────────────┐
 │         Business Logic Layer            │
 │        (Java Application Logic)         │
 └─────────────────────────────────────────┘
-                    │
+│
 ┌─────────────────────────────────────────┐
 │          Data Access Layer              │
 │            (MySQL Database)             │
@@ -95,22 +95,22 @@ Setup Steps
 Clone the repository
 
 bash   git clone git@github.com:moatamen12/Store-management.git
-   cd Store-management
+cd Store-management
 
 Database Configuration
 
 bash   # Create the database
-   mysql -u root -p
-   CREATE DATABASE stockmanger;
-   USE stockmanger;
-   SOURCE database/schema.sql;
+mysql -u root -p
+CREATE DATABASE stockmanger;
+USE stockmanger;
+SOURCE database/schema.sql;
 
 Configure Database Connection
 Update the database connection settings in your configuration file:
 
 properties   db.url=jdbc:mysql://localhost:3306/stockmanger
-   db.username=your_username
-   db.password=your_password
+db.username=your_username
+db.password=your_password
 
 Open Project in NetBeans
 
