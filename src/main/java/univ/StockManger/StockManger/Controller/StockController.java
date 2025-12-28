@@ -30,6 +30,7 @@ public class StockController {
                         @RequestParam(defaultValue = "0") int page,
                         @RequestParam(defaultValue = "10") int size,
                         @RequestParam(required = false) String search,
+                        @RequestParam(required = false) boolean lowStock,
                         Locale locale) {
 
 //        model.addAttribute("locale", locale);
@@ -38,24 +39,22 @@ public class StockController {
             Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
             model.addAttribute("authorities", authorities);
 
-            boolean isRequester = authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_DEMANDEUR"));
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Produits> productPage;
 
-            if (isRequester) {
-                Pageable pageable = PageRequest.of(page, size);
-                Page<Produits> productPage;
-                if (search != null && !search.isEmpty()) {
-                    productPage = produitsRepository.findByNomContainingIgnoreCase(search, pageable);
-                } else {
-                    productPage = produitsRepository.findAll(pageable);
-                }
-                model.addAttribute("products", productPage.getContent());
-                model.addAttribute("currentPage", productPage.getNumber());
-                model.addAttribute("totalPages", productPage.getTotalPages());
-                model.addAttribute("search", search);
+            if (lowStock) {
+                productPage = produitsRepository.findLowStock(pageable);
+            } else if (search != null && !search.isEmpty()) {
+                productPage = produitsRepository.findByNomContainingIgnoreCase(search, pageable);
             } else {
-                List<Produits> products = produitsRepository.findAll();
-                model.addAttribute("products", products);
+                productPage = produitsRepository.findAll(pageable);
             }
+
+            model.addAttribute("products", productPage.getContent());
+            model.addAttribute("currentPage", productPage.getNumber());
+            model.addAttribute("totalPages", productPage.getTotalPages());
+            model.addAttribute("search", search);
+            model.addAttribute("lowStock", lowStock);
         }
 
         return "stock";

@@ -1,5 +1,8 @@
 package univ.StockManger.StockManger.Controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -19,6 +22,7 @@ import univ.StockManger.StockManger.entity.User;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class SGController {
@@ -36,6 +40,7 @@ public class SGController {
     @GetMapping("/sg")
     public String sgDashboard(Model model) {
         List<Demandes> allRequests = demandesRepository.findAll();
+        allRequests.forEach(d -> d.setLignes(d.getLignes().stream().filter(l -> l.getProduit() != null).collect(Collectors.toList())));
         List<Produits> allProducts = produitsRepository.findAll();
 
         long totalRequests = allRequests.size();
@@ -84,12 +89,11 @@ public class SGController {
         return "sg";
     }
 
-
-
     // single handler for the requests page (removed duplicate mapping)
     @GetMapping("/sg/requests")
     public String sgRequests(Model model){
         List<Demandes> requests = demandesRepository.findAll();
+        requests.forEach(d -> d.setLignes(d.getLignes().stream().filter(l -> l.getProduit() != null).collect(Collectors.toList())));
         requests.sort(Comparator.comparing(d -> d.getEtat_demande() != RequestStatus.PENDING));
         // Map each request to a DTO with user name or "deleted user"
         List<Map<String, Object>> requestViews = requests.stream().map(d -> {

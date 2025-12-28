@@ -93,7 +93,10 @@
                             </form>
                         </div>
                         <div class="col-md-6 text-md-end">
-                            <!-- Optional: Add filters here if needed -->
+                            <form th:action="@{/stock}" method="get" class="form-check form-switch form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="lowStock" value="true" id="lowStockFilter" th:checked="${lowStock}" onchange="this.form.submit()">
+                                <label class="form-check-label" for="lowStockFilter">Show only low stock</label>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -148,17 +151,17 @@
                         <ul class="pagination pagination-sm mb-0 gap-1">
                             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                                 <a class="page-link"
-                                   th:href="@{/stock(page=${currentPage - 1}, size=${size}, search=${search})}">Previous</a>
+                                   th:href="@{/stock(page=${currentPage - 1}, size=${size}, search=${search}, lowStock=${lowStock})}">Previous</a>
                             </li>
                             <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
                                 th:classappend="${i == currentPage} ? 'active'">
                                 <a class="page-link"
-                                   th:href="@{/stock(page=${i}, size=${size}, search=${search})}"
+                                   th:href="@{/stock(page=${i}, size=${size}, search=${search}, lowStock=${lowStock})}"
                                    th:text="${i + 1}"></a>
                             </li>
                             <li class="page-item" th:classappend="${currentPage == totalPages-1} ? 'disabled'">
                                 <a class="page-link"
-                                   th:href="@{/stock(page=${currentPage + 1}, size=${size}, search=${search})}">Next</a>
+                                   th:href="@{/stock(page=${currentPage + 1}, size=${size}, search=${search}, lowStock=${lowStock})}">Next</a>
                             </li>
                         </ul>
                     </nav>

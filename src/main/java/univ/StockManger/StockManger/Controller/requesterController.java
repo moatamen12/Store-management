@@ -1,9 +1,14 @@
 package univ.StockManger.StockManger.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -15,6 +20,7 @@ import univ.StockManger.StockManger.entity.*;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class requesterController {
@@ -32,7 +38,7 @@ public class requesterController {
         User user = userRepository.findByEmail(email).orElse(null);
 
         if (user != null) {
-            List<Demandes> requests = demandesRepository.findTop10RecentForDemandeur(user.getId());
+            List<Demandes> requests = demandesRepository.findTop10RecentForDemandeur(user.getId(), PageRequest.of(0, 10));
             model.addAttribute("requests", requests);
 
             model.addAttribute("pendingCount", requests.stream().filter(r -> r.getEtat_demande() == RequestStatus.PENDING).count());
@@ -41,6 +47,30 @@ public class requesterController {
             model.addAttribute("deliveredCount", requests.stream().filter(r -> r.getEtat_demande() == RequestStatus.DELIVERED).count());
         }
         return "requester";
+    }
+
+    @GetMapping("/requester/requests")
+    public String myRequests(Model model, Principal principal,
+                             @RequestParam(defaultValue = "0") int page,
+                             @RequestParam(defaultValue = "10") int size,
+                             @RequestParam(required = false) String search) {
+        String email = principal.getName();
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        if (user != null) {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Demandes> requestPage;
+            if (search != null && !search.isEmpty()) {
+                requestPage = demandesRepository.findByDemandeurIdAndLignesProduitNomContainingIgnoreCaseOrderByRequest_dateDesc(user.getId(), search, pageable);
+            } else {
+                requestPage = demandesRepository.findByDemandeurIdOrderByRequest_dateDesc(user.getId(), pageable);
+            }
+            model.addAttribute("requests", requestPage.getContent());
+            model.addAttribute("currentPage", requestPage.getNumber());
+            model.addAttribute("totalPages", requestPage.getTotalPages());
+            model.addAttribute("search", search);
+        }
+        return "requister_Requests";
     }
 
     @PostMapping("/requester/request")
@@ -102,4 +132,37 @@ public class requesterController {
         return "redirect:/stock";
     }
 
+    @Transactional
+    @GetMapping("/requester/request/cancel/{id}")
+    public String cancelRequest(@PathVariable Long id, Principal principal, RedirectAttributes redirectAttributes) {
+        User user = userRepository.findByEmail(principal.getName()).orElse(null);
+        if (user == null) {
+            redirectAttributes.addFlashAttribute("error", "User not found.");
+            return "redirect:/requester/requests";
+        }
+
+        Demandes demande = demandesRepository.findById(id).orElse(null);
+        if (demande == null || !demande.getDemandeur().getId().equals(user.getId())) {
+            redirectAttributes.addFlashAttribute("error", "Request not found or you don't have permission to cancel it.");
+            return "redirect:/requester/requests";
+        }
+
+        if (demande.getEtat_demande() != RequestStatus.PENDING) {
+            redirectAttributes.addFlashAttribute("error", "Only pending requests can be canceled.");
+            return "redirect:/requester/requests";
+        }
+
+        for (LigneDemande ligne : demande.getLignes()) {
+            Produits produit = ligne.getProduit();
+            if (produit != null) {
+                produit.setQuantite(produit.getQuantite() + ligne.getQuantiteDemandee());
+                produitsRepository.save(produit);
+            }
+        }
+
+        demande.getLignes().clear();
+        demandesRepository.delete(demande);
+        redirectAttributes.addFlashAttribute("success", "Request canceled successfully.");
+        return "redirect:/requester/requests";
+    }
 }

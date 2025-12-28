@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head}"></head>
+<body>
+<div th:replace="~{fragments/layout :: main(content=~{::content}, pageTitle='My Requests')}">
+    <div th:fragment="content">
+        <div th:replace="~{fragments/layout :: alertMessage}"></div>
+
+        <div class="mb-4">
+            <h5 class="fw-bold text-secondary"><i class="bi bi-list-ul me-2"></i>My Requests</h5>
+            <p class="text-muted">Here you can track all the requests you have submitted. You can see the status of each request and cancel any that are still pending.</p>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-white border-bottom border-light p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <form th:action="@{/requester/requests}" method="get" class="w-50">
+                        <div class="input-group">
+                            <input type="text" name="search" class="form-control" placeholder="Search by product name..." th:value="${search}">
+                            <button class="btn btn-outline-secondary" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                    <a th:href="@{/stock}" class="btn btn-primary rounded-pill px-4">
+                        <i class="bi bi-plus-lg me-2"></i>New Request
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                        <tr class="text-muted text-uppercase small" style="letter-spacing: 0.5px;">
+                            <th class="ps-4 py-3">ID</th>
+                            <th class="py-3">Date</th>
+                            <th class="py-3">Status</th>
+                            <th class="py-3">Products</th>
+                            <th class="py-3 text-end pe-4">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="request : ${requests}">
+                            <td class="ps-4 fw-semibold text-secondary" th:text="${request.id}">1</td>
+                            <td th:text="${request.request_date}">2023-01-01</td>
+                            <td>
+                                <span th:text="${request.etat_demande}"
+                                      th:class="${'badge rounded-pill ' + (request.etat_demande.name() == 'PENDING' ? 'bg-warning-subtle text-warning-emphasis border border-warning-subtle' : (request.etat_demande.name() == 'APPROVED' ? 'bg-success-subtle text-success border border-success-subtle' : (request.etat_demande.name() == 'REJECTED' ? 'bg-danger-subtle text-danger border border-danger-subtle' : 'bg-info-subtle text-info border border-info-subtle')))}">
+                                </span>
+                            </td>
+                            <td>
+                                <ul class="list-unstyled mb-0">
+                                    <li th:each="line : ${request.lignes}">
+                                        <span th:text="${line.produit.nom}">Product</span>
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle ms-1" th:text="${'x' + line.quantiteDemandee}">x1</span>
+                                    </li>
+                                </ul>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div th:if="${request.etat_demande.name() == 'PENDING'}">
+                                    <a th:href="@{/requester/request/cancel/{id}(id=${request.id})}"
+                                       class="btn btn-sm btn-outline-danger"
+                                       onclick="return confirm('Are you sure you want to cancel this request?');">
+                                        <i class="bi bi-x-circle"></i> Cancel
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(requests)}">
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                                No requests found. Start by creating a new request.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-top border-light p-3 shadow-sm">
+                <nav th:if="${totalPages > 1}" class="d-flex justify-content-end">
+                    <ul class="pagination pagination-sm mb-0 gap-1">
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link"
+                               th:href="@{/requester/requests(page=${currentPage - 1}, size=${size}, search=${search})}">Previous</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
+                            th:classappend="${i == currentPage} ? 'active'">
+                            <a class="page-link"
+                               th:href="@{/requester/requests(page=${i}, size=${size}, search=${search})}"
+                               th:text="${i + 1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages-1} ? 'disabled'">
+                            <a class="page-link"
+                               th:href="@{/requester/requests(page=${currentPage + 1}, size=${size}, search=${search})}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

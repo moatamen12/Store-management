@@ -1,63 +1,30 @@
 package univ.StockManger.StockManger.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
-@Table(name = "lignes_demande")
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class LigneDemande {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", updatable = false, nullable = false)
-    private Long id;
-
-    @Column(nullable = false)
-    private int quantiteDemandee;
+    private Long idLigneDemande;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "demande_id", nullable = false)
+    @JoinColumn(name = "id_demande")
     private Demandes demande;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "produit_id", nullable = false)
+    @JoinColumn(name = "id_produit")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Produits produit;
+
+    private int quantiteDemandee;
 }
-
-
-
-
-
-//package univ.StockManger.StockManger.entity;
-//
-//import jakarta.persistence.*;
-//import lombok.*;
-//
-//@Entity
-//@Table(name = "lignes_demande")
-//@Getter
-//@Setter
-//@NoArgsConstructor
-//@AllArgsConstructor
-//public class LigneDemande {
-//
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @Column(name = "id", updatable = false, nullable = false)
-//    private Long id;
-//
-//    @Column(nullable = false)
-//    private int quantiteDemandee;
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "demande_id", nullable = false)
-//    private Demandes demande;
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "produit_id", nullable = false)
-//    private Produits produit;
-//}
