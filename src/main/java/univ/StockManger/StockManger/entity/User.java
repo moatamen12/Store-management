@@ -69,7 +69,7 @@ public class User {
     // From Magasinier
     @OneToMany(mappedBy = "magasinier", cascade = CascadeType.ALL)
     private List<Bon> bons = new ArrayList<>();
-
-    @OneToMany(mappedBy = "magasinier")
-    private List<Stock> stocks = new ArrayList<>();
+//
+//    @OneToMany(mappedBy = "magasinier")
+//    private List<Stock> stocks = new ArrayList<>();
 }

@@ -1,9 +1,6 @@
 package univ.StockManger.StockManger.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,7 +32,7 @@ public class requesterController {
         User user = userRepository.findByEmail(email).orElse(null);
 
         if (user != null) {
-            List<Demandes> requests = demandesRepository.findByDemandeur(user);
+            List<Demandes> requests = demandesRepository.findTop10RecentForDemandeur(user.getId());
             model.addAttribute("requests", requests);
 
             model.addAttribute("pendingCount", requests.stream().filter(r -> r.getEtat_demande() == RequestStatus.PENDING).count());
@@ -44,26 +41,6 @@ public class requesterController {
             model.addAttribute("deliveredCount", requests.stream().filter(r -> r.getEtat_demande() == RequestStatus.DELIVERED).count());
         }
         return "requester";
-    }
-
-    @GetMapping("/requester/products")
-    public String showProductList(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String search,
-            Model model) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Produits> products;
-        if (search != null && !search.isEmpty()) {
-            products = produitsRepository.findByNomContainingIgnoreCase(search, pageable);
-        } else {
-            products = produitsRepository.findAll(pageable);
-        }
-        model.addAttribute("products", products.getContent());
-        model.addAttribute("totalPages", products.getTotalPages());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("search", search);
-        return "requester_products";
     }
 
     @PostMapping("/requester/request")
@@ -75,13 +52,13 @@ public class requesterController {
 
         if (productIds == null || productIds.length == 0) {
             redirectAttributes.addFlashAttribute("error", "No products selected.");
-            return "redirect:/requester/products";
+            return "redirect:/stock";
         }
 
         User user = userRepository.findByEmail(principal.getName()).orElse(null);
         if (user == null) {
             redirectAttributes.addFlashAttribute("error", "User not found.");
-            return "redirect:/requester/products";
+            return "redirect:/stock";
         }
 
         Demandes demande = new Demandes();
@@ -96,17 +73,17 @@ public class requesterController {
                 requestedQty = Integer.parseInt(qtyStr);
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute("error", "Invalid quantity for product ID " + productId);
-                return "redirect:/requester/products";
+                return "redirect:/stock";
             }
 
             Produits product = produitsRepository.findById(productId).orElse(null);
             if (product == null) {
                 redirectAttributes.addFlashAttribute("error", "Product not found.");
-                return "redirect:/requester/products";
+                return "redirect:/stock";
             }
             if (requestedQty > product.getQuantite()) {
                 redirectAttributes.addFlashAttribute("error", "Requested quantity for " + product.getNom() + " exceeds available stock.");
-                return "redirect:/requester/products";
+                return "redirect:/stock";
             }
 
             product.setQuantite(product.getQuantite() - requestedQty);
@@ -122,7 +99,7 @@ public class requesterController {
         demandesRepository.save(demande);
 
         redirectAttributes.addFlashAttribute("success", "Request submitted successfully.");
-        return "redirect:/requester/products";
+        return "redirect:/stock";
     }
 
 }

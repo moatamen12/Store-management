@@ -1,5 +1,7 @@
 package univ.StockManger.StockManger.Controller;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,10 +11,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import univ.StockManger.StockManger.Repositories.DemandesRepository;
 import univ.StockManger.StockManger.Repositories.ProduitsRepository;
+import univ.StockManger.StockManger.Repositories.UserRepository;
 import univ.StockManger.StockManger.entity.Demandes;
 import univ.StockManger.StockManger.entity.Produits;
 import univ.StockManger.StockManger.entity.RequestStatus;
+import univ.StockManger.StockManger.entity.User;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Controller
@@ -20,10 +25,12 @@ public class SGController {
 
     private final DemandesRepository demandesRepository;
     private final ProduitsRepository produitsRepository;
+    private final UserRepository userRepository;
 
-    public SGController(DemandesRepository demandesRepository, ProduitsRepository produitsRepository) {
+    public SGController(DemandesRepository demandesRepository, ProduitsRepository produitsRepository, UserRepository userRepository) {
         this.demandesRepository = demandesRepository;
         this.produitsRepository = produitsRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/sg")
@@ -77,10 +84,10 @@ public class SGController {
         return "sg";
     }
 
-    @GetMapping("/magasinier")
-    public String sg(Model model) {
-        return "magasinier";
-    }
+//    @GetMapping("/magasinier")
+//    public String sg(Model model) {
+//        return "magasinier";
+//    }
 
 
     // single handler for the requests page (removed duplicate mapping)
@@ -108,13 +115,6 @@ public class SGController {
         return "sg_requists";
     }
 
-    @GetMapping("/sg/stock")
-    public String sgStock(Model model) {
-        List<Produits> products = produitsRepository.findAll();
-        model.addAttribute("products", products);
-        return "sg_stock";
-    }
-
     @PostMapping("/sg/update/{id}/approve")
     public String approveRequest(@PathVariable Long id, 
                                  @RequestParam(required = false) String returnUrl,
@@ -123,6 +123,13 @@ public class SGController {
         if(opt.isPresent()){
             Demandes demande = opt.get();
             demande.setEtat_demande(RequestStatus.APPROVED);
+            
+            User currentUser = getCurrentUser();
+            if (currentUser != null) {
+                demande.setValidatedBy(currentUser);
+            }
+            
+            demande.setValidation_date(LocalDate.now());
             demandesRepository.save(demande);
             redirectAttributes.addFlashAttribute("success", "Request approved successfully.");
         } else {
@@ -143,11 +150,28 @@ public class SGController {
             if(commentaire != null && !commentaire.trim().isEmpty()){
                 demande.setCommentaire(commentaire);
             }
+            
+            User currentUser = getCurrentUser();
+            if (currentUser != null) {
+                demande.setValidatedBy(currentUser);
+            }
+            
+            demande.setValidation_date(LocalDate.now());
+            
             demandesRepository.save(demande);
             redirectAttributes.addFlashAttribute("success", "Request rejected successfully.");
         } else {
             redirectAttributes.addFlashAttribute("error", "Request not rejected.");
         }
         return "redirect:" + (returnUrl != null && !returnUrl.isEmpty() ? returnUrl : "/sg/requests");
+    }
+
+    private User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            String email = authentication.getName();
+            return userRepository.findByEmail(email).orElse(null);
+        }
+        return null;
     }
 }

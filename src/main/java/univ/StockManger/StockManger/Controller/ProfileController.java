@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import univ.StockManger.StockManger.Repositories.UserRepository;
 import univ.StockManger.StockManger.entity.User;
 
@@ -40,13 +41,15 @@ public class ProfileController {
     @PostMapping("/profile/edit")
     public String profileEditSubmit(@ModelAttribute User formUser,
                                     @RequestParam(value = "currentPassword", required = false) String currentPassword,
-                                    Model model) {
+                                    Model model,
+                                    RedirectAttributes redirectAttributes) {
         User user = currentUser();
 
         // email uniqueness check if changed
         if (!user.getEmail().equals(formUser.getEmail()) && userRepository.existsByEmail(formUser.getEmail())) {
             model.addAttribute("user", formUser);
             model.addAttribute("emailError", "Email already in use.");
+            model.addAttribute("error", "Profile update failed. Please check the errors.");
             return "profile_edit";
         }
 
@@ -60,6 +63,7 @@ public class ProfileController {
             if (currentPassword == null || currentPassword.isBlank() || !passwordEncoder.matches(currentPassword, user.getPassword())) {
                 model.addAttribute("user", formUser);
                 model.addAttribute("passwordError", "Current password is incorrect or missing.");
+                model.addAttribute("error", "Profile update failed. Please check the errors.");
                 // clear sensitive fields before redisplay
                 formUser.setPassword(null);
                 return "profile_edit";
@@ -68,6 +72,7 @@ public class ProfileController {
         }
 
         userRepository.save(user);
+        redirectAttributes.addFlashAttribute("success", "Profile updated successfully.");
         return "redirect:/profile";
     }
 }

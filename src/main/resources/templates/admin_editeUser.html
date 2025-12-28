@@ -30,7 +30,7 @@
                 <div class="col-6 mb-3">
                     <label for="password" class="form-label fw-semibold">Password</label>
                     <div class="input-group">
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" th:field="*{password}"/>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Leave blank to keep current password" th:field="*{password}"/>
                         <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger"></div>
                         <button class="btn btn-info" type="button" id="togglePassword">
                             <i class="bi bi-eye" id="toggleIcon"></i>
@@ -40,18 +40,15 @@
 
                 <div class="col-6 mb-3">
                     <label class="form-label">Role</label>
-                    <select th:field="*{role}" name="role" class="form-select" required>
-                        <option th:value="'Admin'">ADMIN</option>
-                        <option th:value="'magasinier'">MAGASINIER</option>
-                        <option th:value="'Secretaire_General'">SECRETAIRE_GENERAL</option>
-                        <option th:value="'demandeur'">DEMANDEUR</option>
+                    <select th:field="*{role}" class="form-select" required>
+                        <option th:each="roleOpt : ${roles}" th:value="${roleOpt}" th:text="${roleOpt}"></option>
                     </select>
                     <div th:if="${#fields.hasErrors('role')}" th:errors="*{role}" class="text-danger"></div>
                 </div>
 
-                <div class="col-6 text-end">
-                    <button type="submit" class="btn btn-primary me-2">Update</button>
+                <div class="col-12 text-end">
                     <a th:href="@{/admin}" class="btn btn-danger me-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Update User</button>
                 </div>
             </form>
         </div>

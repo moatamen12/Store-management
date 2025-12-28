@@ -31,9 +31,9 @@ public class Produits {
     @OneToMany(mappedBy = "produit", cascade = CascadeType.ALL)
     private List<LigneBon> lignesBon = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stock_id")
-    private Stock stock;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "stock_id")
+//    private Stock stock;
 }
 
 

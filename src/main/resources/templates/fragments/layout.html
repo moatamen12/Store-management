@@ -115,7 +115,7 @@
                     <a class="nav-link" th:href="@{/sg/requests}"><i class="bi bi-inbox me-2"></i>Requests</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/sg/stock}"><i class="bi bi-box me-2"></i>Stock</a>
+                    <a class="nav-link" th:href="@{/stock}"><i class="bi bi-box me-2"></i>Stock</a>
                 </li>
             </ul>
 <!--            DEMANDEUR -->
@@ -127,7 +127,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link text-white" th:href="@{/requester/products}">
+                    <a class="nav-link text-white" th:href="@{/stock}">
                         <i class="bi bi-cart me-2"></i>Products List
                     </a>
                 </li>
@@ -137,7 +137,15 @@
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/profile}"><i class="bi bi-person-gear me-2"></i>Profile</a>
                 </li>
+
+                <li class="nav-item" sec:authorize="!hasAnyRole('SECRETAIRE_GENERAL', 'DEMANDEUR')">
+                    <a class="nav-link text-white" th:href="@{/stock}">
+                        <i class="bi bi-cart me-2"></i>Products List
+                    </a>
+                </li>
             </ul>
+            </ul>
+
         </div>
 
         <div class="p-3 border-top border-white-10" sec:authorize="isAuthenticated()">
@@ -194,13 +202,17 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Auto-hide alerts after 4 seconds
         document.addEventListener('DOMContentLoaded', function() {
+            // Auto-hide alerts after 4 seconds
             setTimeout(function() {
                 var alerts = document.querySelectorAll('.alert');
                 alerts.forEach(function(alert) {
-                    var bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
+                    if (typeof bootstrap !== 'undefined') {
+                        var bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    } else {
+                        alert.remove();
+                    }
                 });
             }, 4000);
         });
