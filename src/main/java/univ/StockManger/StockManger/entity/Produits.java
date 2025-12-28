@@ -1,9 +1,12 @@
 package univ.StockManger.StockManger.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -20,7 +23,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @SQLDelete(sql = "UPDATE Produits SET deleted = true WHERE id=?")
-@Where(clause = "deleted=false")
+@SQLRestriction("deleted=false")
 @EntityListeners(AuditingEntityListener.class)
 public class Produits {
 
@@ -35,8 +38,12 @@ public class Produits {
     @Column(nullable = false)
     private int quantite;
 
+    @Column(nullable = false)
+    @Min(0)
     private int seuilAlerte;
 
+    @Column(nullable = false)
+    @Positive
     private double prixUnitaire;
 
     private String description;
@@ -47,9 +54,11 @@ public class Produits {
     private boolean deleted = false;
 
     @CreatedBy
+    @NotNull
     private String createdBy;
 
     @CreatedDate
+    @NotNull
     private LocalDateTime createdAt;
 
     @LastModifiedDate

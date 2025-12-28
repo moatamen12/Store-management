@@ -160,7 +160,6 @@ public class requesterController {
             }
         }
 
-        demande.getLignes().clear();
         demandesRepository.delete(demande);
         redirectAttributes.addFlashAttribute("success", "Request canceled successfully.");
         return "redirect:/requester/requests";

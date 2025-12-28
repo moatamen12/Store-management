@@ -8,6 +8,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
+@Table(name = "lignes_demande")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,7 +19,7 @@ public class LigneDemande {
     private Long idLigneDemande;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_demande")
+    @JoinColumn(name = "demande_id")
     private Demandes demande;
 
     @ManyToOne(fetch = FetchType.LAZY)

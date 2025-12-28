@@ -11,6 +11,7 @@ import univ.StockManger.StockManger.entity.Produits;
 import univ.StockManger.StockManger.entity.RequestStatus;
 
 import java.util.Collections;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/produits")
@@ -45,11 +46,15 @@ public class ProduitController {
     }
 
     @GetMapping("/edit/{id}")
-    public String showUpdateForm(@PathVariable("id") long id, Model model) {
-        Produits produit = produitsRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid product Id:" + id));
-        model.addAttribute("produit", produit);
-        return "ModifyProducte";
+    public String showUpdateForm(@PathVariable("id") long id, Model model, RedirectAttributes redirectAttributes) {
+        Optional<Produits> produit = produitsRepository.findById(id);
+        if (produit.isPresent()) {
+            model.addAttribute("produit", produit.get());
+            return "ModifyProducte";
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Invalid product Id:" + id);
+            return "redirect:/stock";
+        }
     }
 
     @PostMapping("/update/{id}")
@@ -59,8 +64,19 @@ public class ProduitController {
                     .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_MAGASINIER"));
 
             if (isMagasinier) {
-                produitsRepository.save(produit);
-                redirectAttributes.addFlashAttribute("success", "Product updated successfully.");
+                Produits existingProduit = produitsRepository.findById(id).orElse(null);
+                if (existingProduit != null) {
+                    existingProduit.setNom(produit.getNom());
+                    existingProduit.setQuantite(produit.getQuantite());
+                    existingProduit.setSeuilAlerte(produit.getSeuilAlerte());
+                    existingProduit.setPrixUnitaire(produit.getPrixUnitaire());
+                    existingProduit.setDescription(produit.getDescription());
+                    
+                    produitsRepository.save(existingProduit);
+                    redirectAttributes.addFlashAttribute("success", "Product updated successfully.");
+                } else {
+                    redirectAttributes.addFlashAttribute("error", "Product not found.");
+                }
             } else {
                 redirectAttributes.addFlashAttribute("error", "You are not authorized to update products.");
             }
