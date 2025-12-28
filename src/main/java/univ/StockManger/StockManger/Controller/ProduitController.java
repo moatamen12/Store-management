@@ -7,10 +7,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import univ.StockManger.StockManger.Repositories.ProduitsRepository;
+import univ.StockManger.StockManger.Repositories.UserRepository;
 import univ.StockManger.StockManger.entity.Produits;
 import univ.StockManger.StockManger.entity.RequestStatus;
+import univ.StockManger.StockManger.entity.Role;
+import univ.StockManger.StockManger.entity.User;
+import univ.StockManger.StockManger.events.NotificationType;
+import univ.StockManger.StockManger.service.NotificationService;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -19,6 +25,10 @@ public class ProduitController {
 
     @Autowired
     private ProduitsRepository produitsRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping("/add")
     public String showAddProductForm(Model model) {
@@ -30,11 +40,12 @@ public class ProduitController {
     public String addProduct(@ModelAttribute("produit") Produits produit, RedirectAttributes redirectAttributes, Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
             boolean isMagasinier = authentication.getAuthorities().stream()
-                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_MAGASINIER"));
+                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_magasinier"));
 
             if (isMagasinier) {
                 produit.setCreatedBy(authentication.getName());
                 produitsRepository.save(produit);
+                checkLowStock(produit);
                 redirectAttributes.addFlashAttribute("success", "Product added successfully.");
             } else {
                 redirectAttributes.addFlashAttribute("error", "You are not authorized to add products.");
@@ -61,7 +72,7 @@ public class ProduitController {
     public String updateProduit(@PathVariable("id") long id, @ModelAttribute("produit") Produits produit, RedirectAttributes redirectAttributes, Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
             boolean isMagasinier = authentication.getAuthorities().stream()
-                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_MAGASINIER"));
+                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_magasinier"));
 
             if (isMagasinier) {
                 Produits existingProduit = produitsRepository.findById(id).orElse(null);
@@ -73,6 +84,7 @@ public class ProduitController {
                     existingProduit.setDescription(produit.getDescription());
                     
                     produitsRepository.save(existingProduit);
+                    checkLowStock(existingProduit);
                     redirectAttributes.addFlashAttribute("success", "Product updated successfully.");
                 } else {
                     redirectAttributes.addFlashAttribute("error", "Product not found.");
@@ -90,7 +102,7 @@ public class ProduitController {
     public String deleteProduct(@PathVariable("id") Long id, RedirectAttributes redirectAttributes, Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
             boolean isMagasinier = authentication.getAuthorities().stream()
-                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_MAGASINIER"));
+                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_magasinier"));
 
             if (isMagasinier) {
                 if (produitsRepository.countActiveRequestsForProductInStatus(id, Collections.singletonList(RequestStatus.PENDING)) > 0) {
@@ -106,5 +118,16 @@ public class ProduitController {
             redirectAttributes.addFlashAttribute("error", "You must be logged in to perform this action.");
         }
         return "redirect:/stock";
+    }
+
+    private void checkLowStock(Produits produit) {
+        if (produit.getQuantite() <= produit.getSeuilAlerte()) {
+            List<User> magasiniers = userRepository.findAllByRole(Role.magasinier);
+            for (User magasinier : magasiniers) {
+                notificationService.createNotification(this, NotificationType.LOW_STOCK,
+                        "Product '" + produit.getNom() + "' is low in stock.",
+                        produit.getId(), magasinier.getId());
+            }
+        }
     }
 }

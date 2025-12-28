@@ -13,6 +13,8 @@ import univ.StockManger.StockManger.Repositories.DemandesRepository;
 import univ.StockManger.StockManger.Repositories.ProduitsRepository;
 import univ.StockManger.StockManger.entity.Demandes;
 import univ.StockManger.StockManger.entity.RequestStatus;
+import univ.StockManger.StockManger.events.NotificationType;
+import univ.StockManger.StockManger.service.NotificationService;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,9 +27,10 @@ public class MagasinierController {
 
     @Autowired
     private DemandesRepository demandesRepository;
-
     @Autowired
     private ProduitsRepository produitsRepository;
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping("/magasinier")
     public String dashboard(Model model) {
@@ -88,6 +91,14 @@ public class MagasinierController {
 
         demande.setEtat_demande(RequestStatus.DELIVERED);
         demandesRepository.save(demande);
+
+        // Notify the original requester that their request has been delivered
+        if (demande.getDemandeur() != null) {
+            notificationService.createNotification(this, NotificationType.REQUEST_DELIVERED,
+                    "Your request #" + demande.getId() + " has been delivered.",
+                    demande.getId(), demande.getDemandeur().getId());
+        }
+
         redirectAttributes.addFlashAttribute("success", "Request marked as delivered.");
         return "redirect:/magasinier/requests";
     }

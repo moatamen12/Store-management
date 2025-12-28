@@ -15,10 +15,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import univ.StockManger.StockManger.Repositories.DemandesRepository;
 import univ.StockManger.StockManger.Repositories.ProduitsRepository;
 import univ.StockManger.StockManger.Repositories.UserRepository;
-import univ.StockManger.StockManger.entity.Demandes;
-import univ.StockManger.StockManger.entity.Produits;
-import univ.StockManger.StockManger.entity.RequestStatus;
-import univ.StockManger.StockManger.entity.User;
+import univ.StockManger.StockManger.entity.*;
+import univ.StockManger.StockManger.events.NotificationType;
+import univ.StockManger.StockManger.service.NotificationService;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -30,11 +29,13 @@ public class SGController {
     private final DemandesRepository demandesRepository;
     private final ProduitsRepository produitsRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
-    public SGController(DemandesRepository demandesRepository, ProduitsRepository produitsRepository, UserRepository userRepository) {
+    public SGController(DemandesRepository demandesRepository, ProduitsRepository produitsRepository, UserRepository userRepository, NotificationService notificationService) {
         this.demandesRepository = demandesRepository;
         this.produitsRepository = produitsRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @GetMapping("/sg")
@@ -52,12 +53,10 @@ public class SGController {
         
         long lowStockCount = lowStockProducts.size();
         
-        // Limit low stock items for dashboard display (e.g., top 5)
         List<Produits> lowStockDisplay = lowStockProducts.stream()
                 .limit(5)
                 .toList();
 
-        // Filter for PENDING requests only, then sort by ID descending
         List<Demandes> recentPendingRequests = allRequests.stream()
                 .filter(d -> d.getEtat_demande() == RequestStatus.PENDING)
                 .sorted(Comparator.comparing((Demandes d) -> d.getId()).reversed())
@@ -89,13 +88,11 @@ public class SGController {
         return "sg";
     }
 
-    // single handler for the requests page (removed duplicate mapping)
     @GetMapping("/sg/requests")
     public String sgRequests(Model model){
         List<Demandes> requests = demandesRepository.findAll();
         requests.forEach(d -> d.setLignes(d.getLignes().stream().filter(l -> l.getProduit() != null).collect(Collectors.toList())));
         requests.sort(Comparator.comparing(d -> d.getEtat_demande() != RequestStatus.PENDING));
-        // Map each request to a DTO with user name or "deleted user"
         List<Map<String, Object>> requestViews = requests.stream().map(d -> {
             Map<String, Object> map = new HashMap<>();
             map.put("demande", d);
@@ -131,6 +128,20 @@ public class SGController {
             
             demande.setValidation_date(LocalDate.now());
             demandesRepository.save(demande);
+
+            // Notify the original requester
+            if (demande.getDemandeur() != null) {
+                notificationService.createNotification(this, NotificationType.REQUEST_APPROVED, "Your request #" + demande.getId() + " has been approved.", demande.getId(), demande.getDemandeur().getId());
+            }
+
+            // Notify all storekeepers (magasiniers)
+            List<User> magasiniers = userRepository.findAllByRole(Role.magasinier);
+            for (User magasinier : magasiniers) {
+                notificationService.createNotification(this, NotificationType.REQUEST_APPROVED,
+                        "Request #" + demande.getId() + " has been approved and is ready for delivery.",
+                        demande.getId(), magasinier.getId());
+            }
+
             redirectAttributes.addFlashAttribute("success", "Request approved successfully.");
         } else {
             redirectAttributes.addFlashAttribute("error", "Request not approved.");
@@ -159,6 +170,11 @@ public class SGController {
             demande.setValidation_date(LocalDate.now());
             
             demandesRepository.save(demande);
+
+            if (demande.getDemandeur() != null) {
+                notificationService.createNotification(this, NotificationType.REQUEST_REJECTED, "Your request #" + demande.getId() + " has been rejected.", demande.getId(), demande.getDemandeur().getId());
+            }
+
             redirectAttributes.addFlashAttribute("success", "Request rejected successfully.");
         } else {
             redirectAttributes.addFlashAttribute("error", "Request not rejected.");

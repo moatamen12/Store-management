@@ -17,6 +17,8 @@ import univ.StockManger.StockManger.Repositories.DemandesRepository;
 import univ.StockManger.StockManger.Repositories.ProduitsRepository;
 import univ.StockManger.StockManger.Repositories.UserRepository;
 import univ.StockManger.StockManger.entity.*;
+import univ.StockManger.StockManger.events.NotificationType;
+import univ.StockManger.StockManger.service.NotificationService;
 
 import java.security.Principal;
 import java.util.Comparator;
@@ -33,6 +35,8 @@ public class requesterController {
     private DemandesRepository demandesRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping("/requester")
     public String requesterDashboard(Model model, Principal principal) {
@@ -140,6 +144,14 @@ public class requesterController {
         }
 
         demandesRepository.save(demande);
+
+        // Notify all Secretaries General
+        List<User> secretaries = userRepository.findAllByRole(Role.Secretaire_General);
+        for (User secretary : secretaries) {
+            notificationService.createNotification(this, NotificationType.REQUEST_CREATED,
+                    "New request #" + demande.getId() + " submitted by " + user.getNom(),
+                    demande.getId(), secretary.getId());
+        }
 
         redirectAttributes.addFlashAttribute("success", "Request submitted successfully.");
         return "redirect:/stock";
