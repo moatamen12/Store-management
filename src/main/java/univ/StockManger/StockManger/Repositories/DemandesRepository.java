@@ -20,4 +20,7 @@ public interface DemandesRepository extends JpaRepository<Demandes, Long> {
 
     @Query("SELECT d FROM Demandes d WHERE d.etat_demande = :status")
     List<Demandes> findByEtatDemande(@Param("status") RequestStatus status);
+
+    @Query("SELECT d FROM Demandes d WHERE d.etat_demande = :status ORDER BY d.request_date DESC")
+    List<Demandes> findTop10ByEtatDemandeOrderByRequest_dateDesc(@Param("status") RequestStatus status, Pageable pageable);
 }

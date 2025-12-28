@@ -31,6 +31,7 @@ public class StockMangerApplication {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/sg/**").hasRole("SECRETAIRE_GENERAL")
                         .requestMatchers("/requester/**").hasRole("DEMANDEUR")
+                        .requestMatchers("/magasinier/**").hasRole("MAGASINIER")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

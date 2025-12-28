@@ -84,10 +84,6 @@ public class SGController {
         return "sg";
     }
 
-//    @GetMapping("/magasinier")
-//    public String sg(Model model) {
-//        return "magasinier";
-//    }
 
 
     // single handler for the requests page (removed duplicate mapping)
