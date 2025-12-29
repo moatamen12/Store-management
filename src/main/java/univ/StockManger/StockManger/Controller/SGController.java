@@ -157,6 +157,16 @@ public class SGController {
         Optional<Demandes> opt = demandesRepository.findById(id);
         if(opt.isPresent()){
             Demandes demande = opt.get();
+            
+            if (demande.getEtat_demande() == RequestStatus.DELIVERED) {
+                for (LigneDemande ligne : demande.getLignes()) {
+                    Produits produit = ligne.getProduit();
+                    int quantiteDemandee = ligne.getQuantiteDemandee();
+                    produit.setQuantite(produit.getQuantite() + quantiteDemandee);
+                    produitsRepository.save(produit);
+                }
+            }
+
             demande.setEtat_demande(RequestStatus.REJECTED);
             if(commentaire != null && !commentaire.trim().isEmpty()){
                 demande.setCommentaire(commentaire);

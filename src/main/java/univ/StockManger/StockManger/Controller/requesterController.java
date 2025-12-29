@@ -133,9 +133,6 @@ public class requesterController {
                 return "redirect:/stock";
             }
 
-            product.setQuantite(product.getQuantite() - requestedQty);
-            produitsRepository.save(product);
-
             LigneDemande ligne = new LigneDemande();
             ligne.setProduit(product);
             ligne.setQuantiteDemandee(requestedQty);
@@ -175,14 +172,6 @@ public class requesterController {
         if (demande.getEtat_demande() != RequestStatus.PENDING) {
             redirectAttributes.addFlashAttribute("error", "Only pending requests can be canceled.");
             return "redirect:/requester/requests";
-        }
-
-        for (LigneDemande ligne : demande.getLignes()) {
-            Produits produit = ligne.getProduit();
-            if (produit != null) {
-                produit.setQuantite(produit.getQuantite() + ligne.getQuantiteDemandee());
-                produitsRepository.save(produit);
-            }
         }
 
         demandesRepository.delete(demande);

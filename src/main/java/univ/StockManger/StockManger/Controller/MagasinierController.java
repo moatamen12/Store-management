@@ -12,6 +12,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import univ.StockManger.StockManger.Repositories.DemandesRepository;
 import univ.StockManger.StockManger.Repositories.ProduitsRepository;
 import univ.StockManger.StockManger.entity.Demandes;
+import univ.StockManger.StockManger.entity.LigneDemande;
+import univ.StockManger.StockManger.entity.Produits;
 import univ.StockManger.StockManger.entity.RequestStatus;
 import univ.StockManger.StockManger.events.NotificationType;
 import univ.StockManger.StockManger.service.NotificationService;
@@ -87,6 +89,17 @@ public class MagasinierController {
         if (demande.getEtat_demande() != RequestStatus.APPROVED) {
             redirectAttributes.addFlashAttribute("error", "Only approved requests can be marked as delivered.");
             return "redirect:/magasinier/requests";
+        }
+
+        for (LigneDemande ligne : demande.getLignes()) {
+            Produits produit = ligne.getProduit();
+            int quantiteDemandee = ligne.getQuantiteDemandee();
+            if (produit.getQuantite() < quantiteDemandee) {
+                redirectAttributes.addFlashAttribute("error", "Insufficient stock for product: " + produit.getNom());
+                return "redirect:/magasinier/requests";
+            }
+            produit.setQuantite(produit.getQuantite() - quantiteDemandee);
+            produitsRepository.save(produit);
         }
 
         demande.setEtat_demande(RequestStatus.DELIVERED);
