@@ -5,5 +5,6 @@ public enum NotificationType {
     REQUEST_REJECTED,
     REQUEST_CREATED,
     REQUEST_DELIVERED,
-    LOW_STOCK
+    LOW_STOCK,
+    REPORT_GENERATED
 }

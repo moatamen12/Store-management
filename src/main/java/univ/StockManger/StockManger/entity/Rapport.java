@@ -2,16 +2,16 @@ package univ.StockManger.StockManger.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Check;
+
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "rapports")
-//@Check(constraints = "type IN ('MONTHLY', 'BY_DEPARTMENT', 'BY_PRODUCT_TYPE')")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Rapport {
 
     @Id
@@ -20,91 +20,42 @@ public class Rapport {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ReportType report_type;
+    @Column(name = "report_type", nullable = false, columnDefinition = "VARCHAR(50)")
+    private ReportType reportType;
 
-    @Column(nullable = false)
+    @Column(name = "date_generation", nullable = false)
     private LocalDate dateGeneration;
 
+    @Column(name = "start_date")
     private LocalDate startDate;
 
+    @Column(name = "end_date")
     private LocalDate endDate;
 
-    private Double totalExpense;
-
-    private String targetDepartment;
-
-    private String targetCategory;
-
+    @Column(name = "file_path")
     private String filePath;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "secretaire_general_id", nullable = false)
-    private User secretaireGeneral;
+    @JoinColumn(name = "generated_by_id", nullable = true)
+    private User generatedBy;
+
+    // For BY_USER reports
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "target_user_id")
+    private User targetUser;
+
+    // For BY_PRODUCT reports
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "target_product_id")
+    private Produits targetProduct;
+
+    @Column(name = "total_expense")
+    private Double totalExpense;
 
     @PrePersist
-    private void prePersist() {
-        if (report_type == null) {
-            report_type = ReportType.MONTHLY;
+    protected void onCreate() {
+        if (dateGeneration == null) {
+            this.dateGeneration = LocalDate.now();
         }
     }
-
 }
-
-
-
-
-
-
-//package univ.StockManger.StockManger.entity;
-//
-//import jakarta.persistence.*;
-//import lombok.*;
-//import org.hibernate.annotations.Check;
-//import java.time.LocalDate;
-//
-//@Entity
-//@Table(name = "rapports")
-////@Check(constraints = "type IN ('MONTHLY', 'BY_DEPARTMENT', 'BY_PRODUCT_TYPE')")
-//@Getter
-//@Setter
-//@NoArgsConstructor
-//@AllArgsConstructor
-//public class Rapport {
-//
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @Column(name = "id", updatable = false, nullable = false)
-//    private Long id;
-//
-//    @Enumerated(EnumType.STRING)
-//    @Column(nullable = false)
-//    private ReportType report_type;
-//
-//    @Column(nullable = false)
-//    private LocalDate dateGeneration;
-//
-//    private LocalDate startDate;
-//
-//    private LocalDate endDate;
-//
-//    private Double totalExpense;
-//
-//    private String targetDepartment;
-//
-//    private String targetCategory;
-//
-//    private String filePath;
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "secretaire_general_id", nullable = false)
-//    private SecretaireGeneral secretaireGeneral;
-//
-//    @PrePersist
-//    private void prePersist() {
-//        if (report_type == null) {
-//            report_type = ReportType.MONTHLY;
-//        }
-//    }
-//
-//}

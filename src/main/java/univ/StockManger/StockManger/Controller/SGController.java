@@ -1,9 +1,14 @@
 package univ.StockManger.StockManger.Controller;
 
+import com.lowagie.text.DocumentException;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -13,14 +18,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import univ.StockManger.StockManger.Repositories.DemandesRepository;
-import univ.StockManger.StockManger.Repositories.ProduitsRepository;
-import univ.StockManger.StockManger.Repositories.UserRepository;
+import univ.StockManger.StockManger.Repositories.*;
 import univ.StockManger.StockManger.entity.*;
 import univ.StockManger.StockManger.events.NotificationType;
 import univ.StockManger.StockManger.service.NotificationService;
+import univ.StockManger.StockManger.service.PdfGeneratorService;
+import univ.StockManger.StockManger.service.ReportService;
 
+import java.io.IOException;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -37,13 +44,39 @@ public class SGController {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final MessageSource messageSource;
+    private final RapportRepository rapportRepository;
+    private final ReportService reportService;
+    private final BonRepository bonRepository;
+    private final PdfGeneratorService pdfGeneratorService;
 
-    public SGController(DemandesRepository demandesRepository, ProduitsRepository produitsRepository, UserRepository userRepository, NotificationService notificationService, MessageSource messageSource) {
+    public SGController(DemandesRepository demandesRepository, ProduitsRepository produitsRepository, UserRepository userRepository, NotificationService notificationService, MessageSource messageSource, RapportRepository rapportRepository, ReportService reportService, BonRepository bonRepository, PdfGeneratorService pdfGeneratorService) {
         this.demandesRepository = demandesRepository;
         this.produitsRepository = produitsRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
         this.messageSource = messageSource;
+        this.rapportRepository = rapportRepository;
+        this.reportService = reportService;
+        this.bonRepository = bonRepository;
+        this.pdfGeneratorService = pdfGeneratorService;
+    }
+
+    @GetMapping("/sg/report/{id}/download")
+    public ResponseEntity<byte[]> downloadReportPdf(@PathVariable Long id) throws DocumentException, IOException {
+        Rapport rapport = rapportRepository.findById(id).orElse(null);
+        if (rapport == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<Bon> bons = bonRepository.findAllByDateBetween(rapport.getStartDate(), rapport.getEndDate());
+        byte[] pdf = pdfGeneratorService.generatePdf(rapport, bons);
+
+        String fileName = "report-" + rapport.getId() + "-" + rapport.getDateGeneration() + ".pdf";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 
     @GetMapping("/sg")
@@ -198,6 +231,64 @@ public class SGController {
             redirectAttributes.addFlashAttribute("error", messageSource.getMessage("request.error.notRejected", null, locale));
         }
         return "redirect:" + (returnUrl != null && !returnUrl.isEmpty() ? returnUrl : "/sg/requests");
+    }
+
+    @GetMapping("/sg/reports")
+    public String showReports(Model model,
+                              @RequestParam(defaultValue = "0") int page,
+                              @RequestParam(required = false) String keyword) {
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("dateGeneration").descending());
+        Page<Rapport> reportPage;
+
+        if (keyword != null && !keyword.isEmpty()) {
+            reportPage = rapportRepository.search(keyword, pageable);
+        } else {
+            reportPage = rapportRepository.findAll(pageable);
+        }
+
+        model.addAttribute("reports", reportPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", reportPage.getTotalPages());
+        model.addAttribute("keyword", keyword);
+        return "sg_reports";
+    }
+
+    @PostMapping("/sg/reports/generate")
+    public String generateCustomReport(@RequestParam("startDate") LocalDate startDate,
+                                       @RequestParam("endDate") LocalDate endDate,
+                                       RedirectAttributes redirectAttributes) {
+        try {
+            User currentUser = getCurrentUser();
+            reportService.generateCustomReport(startDate, endDate, currentUser);
+            redirectAttributes.addFlashAttribute("success", "Custom report generated successfully!");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Error generating report.");
+        }
+        return "redirect:/sg/reports";
+    }
+
+    // UPDATED: This now generates a report for the CURRENT month for testing purposes
+    @GetMapping("/sg/generate-report")
+    public String generateReport(RedirectAttributes redirectAttributes) {
+        try {
+            User currentUser = getCurrentUser();
+            YearMonth currentMonth = YearMonth.now();
+            LocalDate startDate = currentMonth.atDay(1);
+            LocalDate endDate = currentMonth.atEndOfMonth();
+            
+            // Use generateCustomReport to create a report for THIS month
+            reportService.generateCustomReport(startDate, endDate, currentUser);
+            
+            redirectAttributes.addFlashAttribute("success", "Report generated successfully for current month!");
+        } catch (DocumentException | IOException e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Error generating report.");
+        }
+        return "redirect:/sg/reports";
     }
 
     private User getCurrentUser() {

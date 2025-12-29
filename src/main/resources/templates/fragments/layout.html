@@ -103,6 +103,7 @@
                 <li class="nav-item"><a class="nav-link" th:href="@{/sg}"><i class="bi bi-speedometer2 me-2"></i><span th:text="#{layout.sidebar.dashboard}">Dashboard</span></a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/sg/requests}"><i class="bi bi-inbox me-2"></i><span th:text="#{layout.sidebar.requests}">Requests</span></a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/magasinier/bons}"><i class="bi bi-list-ul me-2"></i><span th:text="#{layout.sidebar.voucher.list}">Receipt List</span></a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/sg/reports}"><i class="bi bi-file-earmark-text me-2"></i><span>Reports</span></a></li>
             </ul>
         <!-- Requester -->
             <ul class="nav flex-column" sec:authorize="hasRole('DEMANDEUR')">
