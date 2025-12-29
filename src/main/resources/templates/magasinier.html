@@ -4,6 +4,15 @@
 <body>
     <div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='Magasinier Dashboard')">
         <div th:fragment="content">
+            <div class="d-flex justify-content-end mb-3">
+                <a th:href="@{/magasinier/bon-entree}" class="btn btn-primary me-2">
+                    <i class="bi bi-plus-circle"></i> Bon d'Entrée
+                </a>
+                <a th:href="@{/magasinier/bons}" class="btn btn-secondary">
+                    <i class="bi bi-list-ul"></i> Liste des Bons
+                </a>
+            </div>
+
             <div th:replace="fragments/layout :: alertMessage"></div>
 
             <!-- Statistic Cards -->
@@ -44,13 +53,13 @@
                                 <i class="bi bi-card-checklist me-2"></i>Requests to Process
                             </button>
                         </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link py-3 fw-bold text-dark border-0"
-                                    id="receipts-history-tab" data-bs-toggle="tab" data-bs-target="#receipts-history"
-                                    type="button" role="tab" aria-controls="receipts-history" aria-selected="false">
-                                <i class="bi bi-clock-history me-2"></i>Receipts History
-                            </button>
-                        </li>
+<!--                        <li class="nav-item" role="presentation">-->
+<!--                            <button class="nav-link py-3 fw-bold text-dark border-0"-->
+<!--                                    id="receipts-history-tab" data-bs-toggle="tab" data-bs-target="#receipts-history"-->
+<!--                                    type="button" role="tab" aria-controls="receipts-history" aria-selected="false">-->
+<!--                                <i class="bi bi-clock-history me-2"></i>Receipts History-->
+<!--                            </button>-->
+<!--                        </li>-->
                     </ul>
                 </div>
 
@@ -85,12 +94,25 @@
                                             <td>
                                                 <span class="badge bg-success text-white" th:text="${request.demande.etat_demande}">ACCEPTE_SG</span>
                                             </td>
+
                                             <td class="text-end pe-4">
-                                                <form th:action="@{/magasinier/request/deliver/{id}(id=${request.demande.id})}" method="post" style="display:inline;">
-                                                    <button type="submit" class="btn btn-sm btn-outline-success" onclick="return confirm('Mark this request as delivered?');">
-                                                        <i class="bi bi-check-circle"></i> Confirm Delivery
-                                                    </button>
-                                                </form>
+<!--                                                <form th:action="@{/magasinier/request/deliver/{id}(id=${request.demande.id})}" method="post" style="display:inline;">-->
+<!--                                                    <button type="submit" class="btn btn-sm btn-outline-success" onclick="return confirm('Mark this request as delivered?');">-->
+<!--                                                        <i class="bi bi-check-circle"></i> Confirm Delivery-->
+<!--                                                    </button>-->
+<!--                                                </form>-->
+                                                <div th:if="${request.demande.etat_demande != null and request.demande.etat_demande.name() == 'APPROVED'}">
+                                                    <form th:action="@{/magasinier/request/deliver/{id}(id=${request.demande.id})}" method="post" style="display:inline;">
+                                                        <button type="submit" class="btn btn-sm btn-outline-success" onclick="return confirm('Mark this request as delivered?');">
+                                                            <i class="bi bi-check-circle"></i> Confirm Delivery
+                                                        </button>
+                                                    </form>
+                                                    <!--                                    <a th:href="@{/requester/request/confirm-delivery/{id}(id=${request.id})}"-->
+                                                    <!--                                       class="btn btn-sm btn-outline-success"-->
+                                                    <!--                                       onclick="return confirm('Confirm that you have received these items?');">-->
+                                                    <!--                                        <i class="bi bi-check-circle"></i> Confirm Delivery-->
+                                                    <!--                                    </a>-->
+                                                </div>
                                             </td>
                                         </tr>
                                         <tr th:if="${#lists.isEmpty(requests)}">
@@ -101,13 +123,13 @@
                             </div>
                         </div>
 
-                        <!-- Receipts History Tab -->
-                        <div class="tab-pane fade" id="receipts-history" role="tabpanel" aria-labelledby="receipts-history-tab">
-                            <div class="p-4">
-                                <h4 class="fw-bold">Receipts History</h4>
-                                <p class="text-muted">Coming soon...</p>
-                            </div>
-                        </div>
+<!--                        &lt;!&ndash; Receipts History Tab &ndash;&gt;-->
+<!--                        <div class="tab-pane fade" id="receipts-history" role="tabpanel" aria-labelledby="receipts-history-tab">-->
+<!--                            <div class="p-4">-->
+<!--                                <h4 class="fw-bold">Receipts History</h4>-->
+<!--                                <p class="text-muted">Coming soon...</p>-->
+<!--                            </div>-->
+<!--                        </div>-->
                     </div>
                 </div>
             </div>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head"></head>
+<body>
+<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='Entry Voucher')">
+    <div th:fragment="content">
+        <div th:replace="fragments/layout :: alertMessage"></div>
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body">
+                <h5 class="card-title">Create Entry Voucher</h5>
+                <form th:action="@{/magasinier/bon-entree}" method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="produit" class="form-label">Product</label>
+                        <select id="produit" name="produitId" class="form-select" required>
+                            <option value="">Select a product</option>
+                            <option th:each="produit : ${produits}" th:value="${produit.id}" th:text="${produit.nom}"></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="quantite" class="form-label">Quantity</label>
+                        <input type="number" id="quantite" name="quantite" class="form-control" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pdf" class="form-label">Entry Voucher (PDF)</label>
+                        <input type="file" id="pdf" name="pdf" class="form-control" accept="application/pdf" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Voucher</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head"></head>
+<body>
+<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='Receipt List')">
+    <div th:fragment="content">
+        <div th:replace="fragments/layout :: alertMessage"></div>
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body">
+                <h5 class="card-title">Receipt List</h5>
+                <p class="text-muted small mb-3">Browse your receipts here.</p>
+                <div class="mb-3">
+                    <form th:action="@{/magasinier/bons}" method="get">
+                        <div class="input-group">
+                            <input type="text" name="keyword" class="form-control" placeholder="Search..." th:value="${keyword}">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </form>
+                </div>
+                <table class="table table-hover align-middle">
+                    <thead class="bg-light">
+                    <tr class="text-muted text-uppercase small">
+                        <th class="ps-4 py-3">ID</th>
+                        <th class="py-3">Type</th>
+                        <th class="py-3">Date</th>
+                        <th class="py-3">magasinier</th>
+                        <th class="py-3">File Name</th>
+                        <th class="py-3 text-end pe-4">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="bon : ${bons}">
+                        <td class="ps-4 fw-semibold text-secondary" th:text="${bon.id}">#1</td>
+                        <td th:text="${bon.type}"></td>
+                        <td th:text="${#temporals.format(bon.date, 'dd-MM-yyyy')}"></td>
+                        <td th:text="${bon.magasinier.nom + ' ' + bon.magasinier.prenom}"></td>
+                        <td th:text="${bon.pdfPath}"></td>
+                        <td class="text-end pe-4">
+                            <a th:if="${bon.type.toString() == 'ENTRY' and bon.pdfPath != null}" th:href="@{'/uploads/' + ${bon.pdfPath}}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-file-earmark-pdf"></i> View PDF
+                            </a>
+                            <a th:if="${bon.type.toString() == 'EXIT'}" th:href="@{/bon/{id}/view(id=${bon.id})}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-file-earmark-pdf"></i> View PDF
+                            </a>
+                            <a th:href="@{/bon/{id}/pdf(id=${bon.id})}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-download"></i> Download PDF
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <nav th:if="${totalPages > 1}">
+                    <ul class="pagination">
+                        <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/magasinier/bons(keyword=${keyword}, page=${currentPage - 1})}">Previous</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${currentPage == i ? 'active' : ''}">
+                            <a class="page-link" th:href="@{/magasinier/bons(keyword=${keyword}, page=${i})}" th:text="${i + 1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/magasinier/bons(keyword=${keyword}, page=${currentPage + 1})}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

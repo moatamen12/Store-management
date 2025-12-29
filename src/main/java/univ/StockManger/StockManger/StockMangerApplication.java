@@ -12,12 +12,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Optional;
 
 @SpringBootApplication
 @EnableJpaAuditing(auditorAwareRef = "auditorProvider")
-public class StockMangerApplication {
+public class StockMangerApplication implements WebMvcConfigurer {
 
 	public static void main(String[] args) {
 		SpringApplication.run(StockMangerApplication.class, args);
@@ -34,11 +36,12 @@ public class StockMangerApplication {
                                                    CustomAuthenticationSuccessHandler successHandler) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**","/webjars/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/sg/**").hasRole("SECRETAIRE_GENERAL")
-                        .requestMatchers("/requester/**").hasRole("DEMANDEUR")
-                        .requestMatchers("/magasinier/**").hasRole("MAGASINIER")
+                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**","/webjars/**", "/uploads/**").permitAll()
+                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/sg/**").hasAuthority("ROLE_SECRETAIRE_GENERAL")
+                        .requestMatchers("/requester/**").hasAuthority("ROLE_DEMANDEUR")
+                        .requestMatchers("/magasinier/**").hasAuthority("ROLE_MAGASINIER")
+                        .requestMatchers("/bon/**").hasAnyAuthority("ROLE_MAGASINIER", "ROLE_SECRETAIRE_GENERAL")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -73,5 +76,11 @@ public class StockMangerApplication {
             }
             return Optional.of(authentication.getName());
         };
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:uploads/");
     }
 }

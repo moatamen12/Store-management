@@ -19,8 +19,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         // The prefix for messages to be routed to the broker (for broadcasting)
-        registry.enableSimpleBroker("/topic");
+        registry.enableSimpleBroker("/topic", "/user");
         // The prefix for messages bound for @MessageMapping-annotated methods
         registry.setApplicationDestinationPrefixes("/app");
+        // The prefix for user-specific destinations
+        registry.setUserDestinationPrefix("/user");
     }
 }

@@ -37,4 +37,6 @@ public class Bon {
 
     @OneToMany(mappedBy = "bon", cascade = CascadeType.ALL)
     private List<LigneBon> lignesBon;
+
+    private String pdfPath;
 }

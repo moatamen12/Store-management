@@ -5,16 +5,23 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import univ.StockManger.StockManger.Repositories.BonRepository;
+import univ.StockManger.StockManger.Repositories.LigneBonRepository;
 import univ.StockManger.StockManger.Repositories.ProduitsRepository;
 import univ.StockManger.StockManger.Repositories.UserRepository;
-import univ.StockManger.StockManger.entity.Produits;
-import univ.StockManger.StockManger.entity.RequestStatus;
-import univ.StockManger.StockManger.entity.Role;
-import univ.StockManger.StockManger.entity.User;
+import univ.StockManger.StockManger.entity.*;
 import univ.StockManger.StockManger.events.NotificationType;
+import univ.StockManger.StockManger.service.DatabaseUserDetailsService;
 import univ.StockManger.StockManger.service.NotificationService;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +36,12 @@ public class ProduitController {
     private UserRepository userRepository;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private BonRepository bonRepository;
+    @Autowired
+    private LigneBonRepository ligneBonRepository;
+
+    private static final String UPLOAD_DIR = "uploads/";
 
     @GetMapping("/add")
     public String showAddProductForm(Model model) {
@@ -37,23 +50,63 @@ public class ProduitController {
     }
 
     @PostMapping("/add")
-    public String addProduct(@ModelAttribute("produit") Produits produit, RedirectAttributes redirectAttributes, Authentication authentication) {
+    public String addProduct(@ModelAttribute("produit") Produits produit, @RequestParam("quantite") int quantite, @RequestParam("pdf") MultipartFile pdf, RedirectAttributes redirectAttributes, Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
             boolean isMagasinier = authentication.getAuthorities().stream()
-                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_magasinier"));
+                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_MAGASINIER"));
 
             if (isMagasinier) {
-                produit.setCreatedBy(authentication.getName());
-                produitsRepository.save(produit);
-                checkLowStock(produit);
-                redirectAttributes.addFlashAttribute("success", "Product added successfully.");
+                if (pdf.isEmpty()) {
+                    redirectAttributes.addFlashAttribute("error", "Please upload a PDF file.");
+                    return "redirect:/produits/add";
+                }
+
+                try {
+                    // Create the uploads directory if it doesn't exist
+                    Path uploadPath = Paths.get(UPLOAD_DIR);
+                    if (!Files.exists(uploadPath)) {
+                        Files.createDirectories(uploadPath);
+                    }
+
+                    DatabaseUserDetailsService.CustomUserDetails userDetails = (DatabaseUserDetailsService.CustomUserDetails) authentication.getPrincipal();
+                    User magasinier = userDetails.getUser();
+
+                    String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                    String fileName = date + "_" + magasinier.getNom() + "_" + produit.getNom() + ".pdf";
+                    Path path = Paths.get(UPLOAD_DIR + fileName);
+                    Files.write(path, pdf.getBytes());
+
+                    produit.setCreatedBy(authentication.getName());
+                    produit.setQuantite(quantite);
+                    produitsRepository.save(produit);
+
+                    Bon bon = new Bon();
+                    bon.setDate(LocalDate.now());
+                    bon.setMagasinier(magasinier);
+                    bon.setType(ReceiptType.ENTRY);
+                    bon.setPdfPath(fileName);
+                    bonRepository.save(bon);
+
+                    LigneBon ligneBon = new LigneBon();
+                    ligneBon.setBon(bon);
+                    ligneBon.setProduit(produit);
+                    ligneBon.setQuantite(quantite);
+                    ligneBonRepository.save(ligneBon);
+
+                    checkLowStock(produit);
+                    redirectAttributes.addFlashAttribute("success", "Product added successfully.");
+                    return "redirect:/produits/add";
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    redirectAttributes.addFlashAttribute("error", "Failed to upload PDF.");
+                }
             } else {
                 redirectAttributes.addFlashAttribute("error", "You are not authorized to add products.");
             }
         } else {
             redirectAttributes.addFlashAttribute("error", "You must be logged in to perform this action.");
         }
-        return "redirect:/stock";
+        return "redirect:/login";
     }
 
     @GetMapping("/edit/{id}")
@@ -72,7 +125,7 @@ public class ProduitController {
     public String updateProduit(@PathVariable("id") long id, @ModelAttribute("produit") Produits produit, RedirectAttributes redirectAttributes, Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
             boolean isMagasinier = authentication.getAuthorities().stream()
-                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_magasinier"));
+                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_MAGASINIER"));
 
             if (isMagasinier) {
                 Produits existingProduit = produitsRepository.findById(id).orElse(null);
@@ -102,7 +155,7 @@ public class ProduitController {
     public String deleteProduct(@PathVariable("id") Long id, RedirectAttributes redirectAttributes, Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
             boolean isMagasinier = authentication.getAuthorities().stream()
-                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_magasinier"));
+                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_MAGASINIER"));
 
             if (isMagasinier) {
                 if (produitsRepository.countActiveRequestsForProductInStatus(id, Collections.singletonList(RequestStatus.PENDING)) > 0) {

@@ -46,7 +46,13 @@ public class StockController {
             if (lowStock) {
                 productPage = produitsRepository.findLowStock(pageable);
             } else if (search != null && !search.isEmpty()) {
-                productPage = produitsRepository.findByNomContainingIgnoreCase(search, pageable);
+                Long searchLong = null;
+                try {
+                    searchLong = Long.parseLong(search);
+                } catch (NumberFormatException e) {
+                    // Ignore if search is not a valid Long
+                }
+                productPage = produitsRepository.findByNomOrId(search, searchLong, pageable);
             } else {
                 productPage = produitsRepository.findAll(pageable);
             }

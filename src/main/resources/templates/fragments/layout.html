@@ -102,6 +102,7 @@
                 <li class="px-4 py-2 text-uppercase text-white-50 small">Management</li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/sg}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/sg/requests}"><i class="bi bi-inbox me-2"></i>Requests</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/magasinier/bons}"><i class="bi bi-list-ul me-2"></i>Voucher List</a></li>
             </ul>
         <!-- Requester -->
             <ul class="nav flex-column" sec:authorize="hasRole('DEMANDEUR')">
@@ -183,6 +184,8 @@
         </div>
     </main>
 
+    <audio id="notification-sound" src="/sounds/notification.mp3" preload="auto"></audio>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- WebSocket Libraries -->
@@ -225,12 +228,12 @@
             stompClient.connect({}, function (frame) {
                 console.log('Connected: ' + frame);
                 // Subscribe to the user-specific topic
-                stompClient.subscribe('/topic/notifications/' + currentUserId, function (notification) {
+                stompClient.subscribe('/user/' + currentUserId + '/topic/notifications', function (notification) {
                     console.log('Received notification:', notification);
-                    // When a new notification arrives, show a toast and refresh the list
                     const notificationBody = JSON.parse(notification.body);
-                    showRealTimeToast(notificationBody.message);
+                    showRealTimeToast(notificationBody.content);
                     fetchNotifications(); // Re-fetch the list to update count and content
+                    document.getElementById('notification-sound').play();
                 });
             }, function(error) {
                 console.error('STOMP error: ' + error);
