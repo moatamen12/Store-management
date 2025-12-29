@@ -32,7 +32,7 @@ public class PdfService {
         Font boldBodyFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11, Color.BLACK);
 
         // === Header Section ===
-        String titleText = bon.getType() == ReceiptType.ENTRY ? "ENTRY VOUCHER" : "EXIT VOUCHER";
+        String titleText = bon.getType() == ReceiptType.ENTRY ? "BON D'ENTREE" : "BON DE SORTIE";
         Paragraph title = new Paragraph(titleText, titleFont);
         title.setAlignment(Element.ALIGN_CENTER);
         document.add(title);
@@ -45,14 +45,14 @@ public class PdfService {
         infoTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
 
         infoTable.addCell(new Phrase("Date: " + bon.getDate(), boldBodyFont));
-        infoTable.addCell(new Phrase("Voucher No: " + bon.getId(), boldBodyFont));
+        infoTable.addCell(new Phrase("N° BON: " + bon.getId(), boldBodyFont));
         
         if (bon.getDemande() != null && bon.getDemande().getDemandeur() != null) {
-            infoTable.addCell(new Phrase("Requester: " + bon.getDemande().getDemandeur().getNom() + " " + bon.getDemande().getDemandeur().getPrenom(), bodyFont));
+            infoTable.addCell(new Phrase("Demandeur: " + bon.getDemande().getDemandeur().getNom() + " " + bon.getDemande().getDemandeur().getPrenom(), bodyFont));
         } else {
             infoTable.addCell(new Phrase(" ", bodyFont));
         }
-        infoTable.addCell(new Phrase("Storekeeper: " + bon.getMagasinier().getNom() + " " + bon.getMagasinier().getPrenom(), bodyFont));
+        infoTable.addCell(new Phrase("Magasinier: " + bon.getMagasinier().getNom() + " " + bon.getMagasinier().getPrenom(), bodyFont));
         
         document.add(infoTable);
 
@@ -69,16 +69,16 @@ public class PdfService {
         
         cell.setPhrase(new Phrase("DESIGNATION", headerFont));
         table.addCell(cell);
-        cell.setPhrase(new Phrase("QUANTITY", headerFont));
+        cell.setPhrase(new Phrase("QUANTITE", headerFont));
         table.addCell(cell);
-        cell.setPhrase(new Phrase("UNIT PRICE", headerFont));
+        cell.setPhrase(new Phrase("P.U. HT", headerFont));
         table.addCell(cell);
-        cell.setPhrase(new Phrase("TOTAL AMOUNT", headerFont));
+        cell.setPhrase(new Phrase("MONTANT HT", headerFont));
         table.addCell(cell);
 
         // Table Body
         double totalAmount = 0;
-        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
+        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.FRANCE);
 
         for (LigneBon ligne : bon.getLignesBon()) {
             double montant = ligne.getQuantite() * ligne.getProduit().getPrixUnitaire();
@@ -98,7 +98,7 @@ public class PdfService {
         totalTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
 
         totalTable.addCell(new Phrase("")); // Empty cell for spacing
-        PdfPCell totalCell = new PdfPCell(new Phrase("Total: " + currencyFormatter.format(totalAmount), boldBodyFont));
+        PdfPCell totalCell = new PdfPCell(new Phrase("Total HT: " + currencyFormatter.format(totalAmount), boldBodyFont));
         totalCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
         totalCell.setBorder(Rectangle.NO_BORDER);
         totalTable.addCell(totalCell);
@@ -113,8 +113,8 @@ public class PdfService {
         signatureTable.setHorizontalAlignment(Element.ALIGN_CENTER);
         signatureTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
 
-        signatureTable.addCell(new Phrase("Storekeeper", boldBodyFont));
-        signatureTable.addCell(new Phrase("Requester", boldBodyFont));
+        signatureTable.addCell(new Phrase("Le Magasinier", boldBodyFont));
+        signatureTable.addCell(new Phrase("Le Demandeur", boldBodyFont));
         
         document.add(signatureTable);
 

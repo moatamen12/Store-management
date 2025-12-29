@@ -41,4 +41,7 @@ public interface DemandesRepository extends JpaRepository<Demandes, Long> {
     
     @Query("SELECT count(d) FROM Demandes d WHERE d.demandeur.id = :demandeurId AND d.etat_demande = :etatDemande")
     long countByDemandeurIdAndEtat_demande(@Param("demandeurId") Long demandeurId, @Param("etatDemande") RequestStatus etatDemande);
+
+    @Query("SELECT d FROM Demandes d WHERE d.etat_demande IN ('PENDING', 'APPROVED') OR (d.etat_demande = 'DELIVERED' AND d.bon.magasinier = :magasinier) ORDER BY CASE WHEN d.etat_demande = 'DELIVERED' THEN d.bon.date ELSE d.request_date END DESC")
+    List<Demandes> findMagasinierRequests(@Param("magasinier") User magasinier);
 }

@@ -2,13 +2,13 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragments/layout :: head"></head>
 <body>
-<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='Access Denied')">
+<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle=#{access.denied.title})">
     <div th:fragment="content d-flex align-item-center justify-content-center">
         <div class="container  text-center">
             <h1 class="display-1">403</h1>
-            <h2>Access Denied</h2>
-            <p>Sorry, you do not have permission to access this page.</p>
-            <a th:href="@{/}" class="btn btn-primary">Go to Dashboard</a>
+            <h2 th:text="#{access.denied.title}">Access Denied</h2>
+            <p th:text="#{access.denied.message}">Sorry, you do not have permission to access this page.</p>
+            <a th:href="@{/}" class="btn btn-primary" th:text="#{access.denied.go.to.dashboard}">Go to Dashboard</a>
         </div>
     </div>
 </div>

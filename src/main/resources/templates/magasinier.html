@@ -2,14 +2,14 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="fragments/layout :: head"></head>
 <body>
-    <div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='Magasinier Dashboard')">
+    <div th:replace="fragments/layout :: main(content=~{::content}, pageTitle=#{page.title.magasinier.dashboard})">
         <div th:fragment="content">
             <div class="d-flex justify-content-end mb-3">
                 <a th:href="@{/magasinier/bon-entree}" class="btn btn-primary me-2">
-                    <i class="bi bi-plus-circle"></i> Bon d'Entrée
+                    <i class="bi bi-plus-circle"></i> <span th:text="#{button.entry.voucher}">Entry Voucher</span>
                 </a>
                 <a th:href="@{/magasinier/bons}" class="btn btn-secondary">
-                    <i class="bi bi-list-ul"></i> Liste des Bons
+                    <i class="bi bi-list-ul"></i> <span th:text="#{button.voucher.list}">Voucher List</span>
                 </a>
             </div>
 
@@ -20,7 +20,7 @@
                 <div class="col-md-4">
                     <div class="card shadow-sm">
                         <div class="card-body">
-                            <h5 class="card-title">Total Products</h5>
+                            <h5 class="card-title" th:text="#{text.total.products}">Total Products</h5>
                             <p class="card-text fs-4 fw-bold">1,234</p>
                         </div>
                     </div>
@@ -28,7 +28,7 @@
                 <div class="col-md-4">
                     <div class="card shadow-sm">
                         <div class="card-body">
-                            <h5 class="card-title">Items in Stock</h5>
+                            <h5 class="card-title" th:text="#{text.items.in.stock}">Items in Stock</h5>
                             <p class="card-text fs-4 fw-bold">5,678</p>
                         </div>
                     </div>
@@ -36,7 +36,7 @@
                 <div class="col-md-4">
                     <div class="card shadow-sm">
                         <div class="card-body">
-                            <h5 class="card-title">Pending Requests</h5>
+                            <h5 class="card-title" th:text="#{text.pending.requests}">Pending Requests</h5>
                             <p class="card-text fs-4 fw-bold" th:text="${#lists.size(requests)}">0</p>
                         </div>
                     </div>
@@ -50,16 +50,9 @@
                             <button class="nav-link active py-3 fw-bold text-dark border-0 border-bottom-3 border-primary rounded-0"
                                     id="requests-to-process-tab" data-bs-toggle="tab" data-bs-target="#requests-to-process"
                                     type="button" role="tab" aria-controls="requests-to-process" aria-selected="true">
-                                <i class="bi bi-card-checklist me-2"></i>Requests to Process
+                                <i class="bi bi-card-checklist me-2"></i><span th:text="#{text.requests.to.process}">Requests to Process</span>
                             </button>
                         </li>
-<!--                        <li class="nav-item" role="presentation">-->
-<!--                            <button class="nav-link py-3 fw-bold text-dark border-0"-->
-<!--                                    id="receipts-history-tab" data-bs-toggle="tab" data-bs-target="#receipts-history"-->
-<!--                                    type="button" role="tab" aria-controls="receipts-history" aria-selected="false">-->
-<!--                                <i class="bi bi-clock-history me-2"></i>Receipts History-->
-<!--                            </button>-->
-<!--                        </li>-->
                     </ul>
                 </div>
 
@@ -72,11 +65,11 @@
                                     <thead class="bg-light">
                                         <tr class="text-muted text-uppercase small" style="letter-spacing: 0.5px;">
                                             <th class="ps-4 py-3">ID</th>
-                                            <th class="py-3">Requester</th>
-                                            <th class="py-3">Product(s)</th>
-                                            <th class="py-3">Date</th>
-                                            <th class="py-3">Status</th>
-                                            <th class="py-3 text-end pe-4">Action</th>
+                                            <th class="py-3" th:text="#{text.requester}">Requester</th>
+                                            <th class="py-3" th:text="#{text.products}">Product(s)</th>
+                                            <th class="py-3" th:text="#{text.date}">Date</th>
+                                            <th class="py-3" th:text="#{text.status}">Status</th>
+                                            <th class="py-3 text-end pe-4" th:text="#{text.action}">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -88,7 +81,7 @@
                                                     <li th:each="line : ${request.demande.lignes}"
                                                         th:text="${line.produit.nom + ' (x' + line.quantiteDemandee + ')'}">Product (xQ)</li>
                                                 </ul>
-                                                <span th:if="${#lists.isEmpty(request.demande.lignes)}" class="text-muted small">No products</span>
+                                                <span th:if="${#lists.isEmpty(request.demande.lignes)}" class="text-muted small" th:text="#{text.no.products}">No products</span>
                                             </td>
                                             <td th:text="${#temporals.format(request.demande.request_date, 'dd-MM-yyyy')}">2025-01-01</td>
                                             <td>
@@ -96,40 +89,22 @@
                                             </td>
 
                                             <td class="text-end pe-4">
-<!--                                                <form th:action="@{/magasinier/request/deliver/{id}(id=${request.demande.id})}" method="post" style="display:inline;">-->
-<!--                                                    <button type="submit" class="btn btn-sm btn-outline-success" onclick="return confirm('Mark this request as delivered?');">-->
-<!--                                                        <i class="bi bi-check-circle"></i> Confirm Delivery-->
-<!--                                                    </button>-->
-<!--                                                </form>-->
                                                 <div th:if="${request.demande.etat_demande != null and request.demande.etat_demande.name() == 'APPROVED'}">
                                                     <form th:action="@{/magasinier/request/deliver/{id}(id=${request.demande.id})}" method="post" style="display:inline;">
-                                                        <button type="submit" class="btn btn-sm btn-outline-success" onclick="return confirm('Mark this request as delivered?');">
-                                                            <i class="bi bi-check-circle"></i> Confirm Delivery
+                                                        <button type="submit" class="btn btn-sm btn-outline-success" th:attr="onclick='return confirm(\'' + #{text.confirm.delivery} + '\');'">
+                                                            <i class="bi bi-check-circle"></i> <span th:text="#{button.confirm.delivery}">Confirm Delivery</span>
                                                         </button>
                                                     </form>
-                                                    <!--                                    <a th:href="@{/requester/request/confirm-delivery/{id}(id=${request.id})}"-->
-                                                    <!--                                       class="btn btn-sm btn-outline-success"-->
-                                                    <!--                                       onclick="return confirm('Confirm that you have received these items?');">-->
-                                                    <!--                                        <i class="bi bi-check-circle"></i> Confirm Delivery-->
-                                                    <!--                                    </a>-->
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr th:if="${#lists.isEmpty(requests)}">
-                                            <td colspan="6" class="text-center py-4 text-muted">No accepted requests to process.</td>
+                                            <td colspan="6" class="text-center py-4 text-muted" th:text="#{text.no.requests.to.process}">No accepted requests to process.</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-
-<!--                        &lt;!&ndash; Receipts History Tab &ndash;&gt;-->
-<!--                        <div class="tab-pane fade" id="receipts-history" role="tabpanel" aria-labelledby="receipts-history-tab">-->
-<!--                            <div class="p-4">-->
-<!--                                <h4 class="fw-bold">Receipts History</h4>-->
-<!--                                <p class="text-muted">Coming soon...</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
                     </div>
                 </div>
             </div>

@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
     <head th:replace="fragments/layout :: head"></head>
     <body>
-        <div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='Requester Dashboard')">
+        <div th:replace="fragments/layout :: main(content=~{::content}, pageTitle=#{requester.dashboard.title})">
             <div th:fragment="content">
                 <div th:replace="fragments/layout :: alertMessage"></div>
 
@@ -16,7 +16,7 @@
                                     <i class="bi bi-hourglass-split fs-4"></i>
                                 </div>
                                 <div>
-                                    <h6 class="text-muted mb-1">Pending</h6>
+                                    <h6 class="text-muted mb-1" th:text="#{requester.dashboard.pending}">Pending</h6>
                                     <h3 class="fw-bold mb-0" th:text="${pendingCount}">0</h3>
                                 </div>
                             </div>
@@ -30,7 +30,7 @@
                                     <i class="bi bi-check-circle fs-4"></i>
                                 </div>
                                 <div>
-                                    <h6 class="text-muted mb-1">Approved</h6>
+                                    <h6 class="text-muted mb-1" th:text="#{requester.dashboard.approved}">Approved</h6>
                                     <h3 class="fw-bold mb-0" th:text="${approvedCount}">0</h3>
                                 </div>
                             </div>
@@ -44,7 +44,7 @@
                                     <i class="bi bi-x-circle fs-4"></i>
                                 </div>
                                 <div>
-                                    <h6 class="text-muted mb-1">Rejected</h6>
+                                    <h6 class="text-muted mb-1" th:text="#{requester.dashboard.rejected}">Rejected</h6>
                                     <h3 class="fw-bold mb-0" th:text="${rejectedCount}">0</h3>
                                 </div>
                             </div>
@@ -58,7 +58,7 @@
                                     <i class="bi bi-box-seam fs-4"></i>
                                 </div>
                                 <div>
-                                    <h6 class="text-muted mb-1">Delivered</h6>
+                                    <h6 class="text-muted mb-1" th:text="#{requester.dashboard.delivered}">Delivered</h6>
                                     <h3 class="fw-bold mb-0" th:text="${deliveredCount}">0</h3>
                                 </div>
                             </div>
@@ -69,9 +69,9 @@
                 <!-- Requests List -->
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                     <div class="card-header bg-white border-bottom border-light p-3 d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 fw-bold text-secondary"><i class="bi bi-list-ul me-2"></i>My Requests</h5>
+                        <h5 class="mb-0 fw-bold text-secondary"><i class="bi bi-list-ul me-2"></i><span th:text="#{requester.dashboard.myRequests}">My Requests</span></h5>
                         <a th:href="@{/stock}" class="btn btn-primary rounded-pill px-4">
-                            <i class="bi bi-plus-lg me-2"></i>New Request
+                            <i class="bi bi-plus-lg me-2"></i><span th:text="#{requester.dashboard.newRequest}">New Request</span>
                         </a>
                     </div>
                     <div class="card-body p-0">
@@ -79,11 +79,11 @@
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="bg-light">
                                 <tr class="text-muted text-uppercase small" style="letter-spacing: 0.5px;">
-                                    <th class="ps-4 py-3">ID</th>
-                                    <th class="py-3">Date</th>
-                                    <th class="py-3">Status</th>
-                                    <th class="py-3">Products</th>
-                                    <th class="py-3 text-end pe-4">Actions</th>
+                                    <th class="ps-4 py-3" th:text="#{requester.dashboard.table.id}">ID</th>
+                                    <th class="py-3" th:text="#{requester.dashboard.table.date}">Date</th>
+                                    <th class="py-3" th:text="#{requester.dashboard.table.status}">Status</th>
+                                    <th class="py-3" th:text="#{requester.dashboard.table.products}">Products</th>
+                                    <th class="py-3 text-end pe-4" th:text="#{requester.dashboard.table.actions}">Actions</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -108,8 +108,8 @@
                                         <div th:if="${request.etat_demande.name() == 'PENDING'}">
                                             <a th:href="@{/requester/request/cancel/{id}(id=${request.id})}"
                                                class="btn btn-sm btn-outline-danger"
-                                               onclick="return confirm('Are you sure you want to cancel this request?');">
-                                                <i class="bi bi-x-circle"></i> Cancel
+                                               th:attr="onclick='return confirm(\'' + #{requester.dashboard.table.cancel.confirm} + '\');'">
+                                                <i class="bi bi-x-circle"></i> <span th:text="#{requester.dashboard.table.cancel}">Cancel</span>
                                             </a>
                                         </div>
                                     </td>
@@ -117,7 +117,7 @@
                                 <tr th:if="${#lists.isEmpty(requests)}">
                                     <td colspan="5" class="text-center py-4 text-muted">
                                         <i class="bi bi-inbox fs-4 d-block mb-2"></i>
-                                        No requests found. Start by creating a new request.
+                                        <span th:text="#{requester.dashboard.noRequests}">No requests found. Start by creating a new request.</span>
                                     </td>
                                 </tr>
                                 </tbody>

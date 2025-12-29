@@ -2,17 +2,17 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragments/layout :: head"></head>
 <body>
-<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='Admin Panel')">
+<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle=#{admin.title})">
     <div th:fragment="content">
 
         <div th:replace="fragments/layout :: alertMessage"></div>
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="fw-bold text-dark">Manage Users</h2>
-                <p class="text-secondary mb-0">Overview of all system accounts and permissions.</p>
+                <h2 class="fw-bold text-dark" th:text="#{admin.manage.users}">Manage Users</h2>
+                <p class="text-secondary mb-0" th:text="#{admin.users.description}">Overview of all system accounts and permissions.</p>
             </div>
             <a th:href="@{/admin/addUser}" class="btn btn-primary shadow-sm rounded-3 px-4">
-                <i class="bi bi-plus-lg me-2"></i>Add New User
+                <i class="bi bi-plus-lg me-2"></i><span th:text="#{admin.add.new.user}">Add New User</span>
             </a>
         </div>
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
@@ -26,7 +26,7 @@
                                 <i class="bi bi-search"></i>
                             </span>
                             <input type="text" class="form-control form-control-lg border-light bg-light ps-5 rounded-pill"
-                                   id="searchInput" placeholder="Search users...">
+                                   id="searchInput" th:placeholder="#{admin.search.users}">
                         </div>
                     </div>
                 </div>
@@ -38,9 +38,9 @@
                         <thead class="bg-light">
                         <tr class="text-muted text-uppercase small" style="letter-spacing: 0.5px;">
                             <th class="ps-4 py-3">ID</th>
-                            <th class="py-3">User</th>
-                            <th class="py-3">Role</th>
-                            <th class="py-3 text-end pe-4">Actions</th>
+                            <th class="py-3" th:text="#{admin.table.user}">User</th>
+                            <th class="py-3" th:text="#{admin.table.role}">Role</th>
+                            <th class="py-3 text-end pe-4" th:text="#{admin.table.actions}">Actions</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -73,11 +73,11 @@
                                 <div class="btn-group">
                                     <a th:href="@{/admin/editUser/{id}(id=${user.id})}"
                                        class="btn btn-light btn-sm text-primary rounded-2 me-2"
-                                       title="Edit">
+                                       th:title="#{admin.button.edit}">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
-                                    <form th:action="@{/admin/deleteUser/{id}(id=${user.id})}" method="post" onsubmit="return confirm('Are you sure you want to delete this user?');">
-                                        <button type="submit" class="btn btn-light btn-sm text-danger rounded-2" title="Delete">
+                                    <form th:action="@{/admin/deleteUser/{id}(id=${user.id})}" method="post" th:onsubmit="|return confirm('#{admin.confirm.delete}');|">
+                                        <button type="submit" class="btn btn-light btn-sm text-danger rounded-2" th:title="#{admin.button.delete}">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
@@ -92,7 +92,7 @@
             <div class="card-footer bg-white border-top border-light p-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="text-muted small">
-                        Rows per page:
+                        <span th:text="#{text.rows.per.page}">Rows per page:</span>
                         <select id="pageSize" class="form-select form-select-sm d-inline-block border-0 bg-light" style="width:auto;">
                             <option value="5">5</option>
                             <option value="10" selected>10</option>

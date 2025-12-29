@@ -2,35 +2,35 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
     <head th:replace="fragments/layout :: head"></head>
     <body>
-        <div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='add User')">
+        <div th:replace="fragments/layout :: main(content=~{::content}, pageTitle=#{admin.addUser.title})">
             <div th:fragment="content">
 
             <div th:replace="fragments/layout :: alertMessage"></div>
-                <h3>Add User</h3>
+                <h3 th:text="#{admin.addUser.title}">Add User</h3>
                 <form th:action="@{/admin/addUser}" th:object="${user}" method="post" class="row justify-content-start">
 
                     <div class="col-6 mb-3">
-                        <label class="form-label">First Name</label>
-                        <input name="prenom" class="form-control" placeholder="Enter the User First Name" required th:field="*{prenom}"/>
+                        <label class="form-label" th:text="#{admin.addUser.firstName}">First Name</label>
+                        <input name="prenom" class="form-control" th:placeholder="#{admin.addUser.firstName.placeholder}" required th:field="*{prenom}"/>
                         <div th:if="${#fields.hasErrors('prenom')}" th:errors="*{prenom}" class="text-danger"></div>
                     </div>
 
                     <div class="col-6 mb-3">
-                        <label class="form-label">Last Name</label>
-                        <input name="nom" class="form-control" placeholder="Enter the User Last Name" required th:field="*{nom}"/>
+                        <label class="form-label" th:text="#{admin.addUser.lastName}">Last Name</label>
+                        <input name="nom" class="form-control" th:placeholder="#{admin.addUser.lastName.placeholder}" required th:field="*{nom}"/>
                         <div th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}" class="text-danger"></div>
                     </div>
 
                     <div class="col-6 mb-3">
-                        <label class="form-label">Email</label>
-                        <input name="email" type="email" class="form-control" placeholder="Enter the User Email" required th:field="*{email}"/>
+                        <label class="form-label" th:text="#{admin.addUser.email}">Email</label>
+                        <input name="email" type="email" class="form-control" th:placeholder="#{admin.addUser.email.placeholder}" required th:field="*{email}"/>
                         <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger"></div>
                     </div>
 
                     <div class="col-6 mb-3">
-                        <label for="password" class="form-label fw-semibold">Password</label>
+                        <label for="password" class="form-label fw-semibold" th:text="#{admin.addUser.password}">Password</label>
                         <div class="input-group">
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required th:field="*{password}"/>
+                            <input type="password" class="form-control" id="password" name="password" th:placeholder="#{admin.addUser.password.placeholder}" required th:field="*{password}"/>
                             <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger"></div>
                             <button class="btn btn-info" type="button" id="togglePassword">
                                 <i class="bi bi-eye" id="toggleIcon"></i>
@@ -39,17 +39,17 @@
                     </div>
 
                     <div class="col-6 mb-3">
-                        <label class="form-label">Role</label>
+                        <label class="form-label" th:text="#{admin.addUser.role}">Role</label>
                         <select th:field="*{role}" class="form-select" required>
-                            <option value="" disabled selected>Select a role</option>
+                            <option value="" disabled selected th:text="#{admin.addUser.select.role}">Select a role</option>
                             <option th:each="roleOpt : ${roles}" th:value="${roleOpt}" th:text="${roleOpt}"></option>
                         </select>
                         <div th:if="${#fields.hasErrors('role')}" th:errors="*{role}" class="text-danger"></div>
                     </div>
 
                     <div class="col-12 text-end">
-                        <a th:href="@{/admin}" class="btn btn-danger me-2">Cancel</a>
-                        <button type="submit" class="btn btn-primary">Create User</button>
+                        <a th:href="@{/admin}" class="btn btn-danger me-2" th:text="#{button.cancel}">Cancel</a>
+                        <button type="submit" class="btn btn-primary" th:text="#{admin.addUser.create.user}">Create User</button>
                     </div>
                 </form>
             </div>

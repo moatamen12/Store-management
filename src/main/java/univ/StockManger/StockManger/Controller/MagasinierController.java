@@ -83,8 +83,10 @@ public class MagasinierController {
             model.addAttribute("error", error);
         }
 
-        List<RequestStatus> statuses = Arrays.asList(RequestStatus.APPROVED, RequestStatus.PENDING);
-        List<Demandes> allRequests = demandesRepository.findByEtat_demandeInOrderByRequest_dateDesc(statuses);
+        DatabaseUserDetailsService.CustomUserDetails userDetails = (DatabaseUserDetailsService.CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User magasinier = userDetails.getUser();
+        List<Demandes> allRequests = demandesRepository.findMagasinierRequests(magasinier);
+        
         List<Map<String, Object>> requestViews = allRequests.stream().map(d -> {
             Map<String, Object> map = new HashMap<>();
             map.put("demande", d);
@@ -95,6 +97,7 @@ public class MagasinierController {
             return map;
         }).collect(Collectors.toList());
         model.addAttribute("requests", requestViews);
+
         return "magasinier_requests";
     }
 

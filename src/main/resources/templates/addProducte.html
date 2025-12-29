@@ -2,35 +2,35 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragments/layout :: head"></head>
 <body>
-<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='Add Product')">
+<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle=#{page.title.add.product})">
     <div th:fragment="content">
         <div class="container">
             <div th:replace="fragments/layout :: alertMessage"></div>
-            <h2>Add a new product</h2>
+            <h2 th:text="#{page.title.add.product}">Add a new product</h2>
             <form th:action="@{/produits/add}" th:object="${produit}" method="post" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label for="nom">Product name:</label>
+                    <label for="nom" th:text="#{label.product.name}">Product name:</label>
                     <input type="text" class="form-control" id="nom" th:field="*{nom}" required>
                 </div>
                 <div class="form-group">
-                    <label for="quantite">Quantity:</label>
+                    <label for="quantite" th:text="#{label.quantity}">Quantity:</label>
                     <input type="number" class="form-control" id="quantite" name="quantite" required>
                 </div>
                 <div class="form-group">
-                    <label for="seuilAlerte">Alert Threshold:</label>
+                    <label for="seuilAlerte" th:text="#{label.alert.threshold}">Alert Threshold:</label>
                     <input type="number" class="form-control" id="seuilAlerte" th:field="*{seuilAlerte}">
                 </div>
                 <div class="form-group">
-                    <label for="prixUnitaire">Unit Price:</label>
+                    <label for="prixUnitaire" th:text="#{label.unit.price}">Unit Price:</label>
                     <input type="number" step="0.01" class="form-control" id="prixUnitaire" th:field="*{prixUnitaire}">
                 </div>
                 <div class="form-group">
-                    <label for="pdf">Entry Voucher (PDF):</label>
+                    <label for="pdf" th:text="#{label.entry.voucher.pdf}">Entry Voucher (PDF):</label>
                     <input type="file" class="form-control" id="pdf" name="pdf" accept="application/pdf" required>
                 </div>
                 <div class="col-12 text-end mt-3">
-                    <a th:href="@{/stock}" class="btn btn-danger me-2">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Add Product</button>
+                    <a th:href="@{/stock}" class="btn btn-danger me-2" th:text="#{button.cancel}">Cancel</a>
+                    <button type="submit" class="btn btn-primary" th:text="#{button.add.product}">Add Product</button>
                 </div>
             </form>
         </div>

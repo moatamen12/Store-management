@@ -2,14 +2,14 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragments/layout :: head"></head>
 <body>
-    <div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='Manage Requests')">
+    <div th:replace="fragments/layout :: main(content=~{::content}, pageTitle=#{magasinier.requests.title})">
         <div th:fragment="content">
             <div th:replace="fragments/layout :: alertMessage"></div>
 
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h2 class="fw-bold text-dark">Manage Requests</h2>
-                    <p class="text-secondary mb-0">See submitted stock requests.</p>
+                    <h2 class="fw-bold text-dark" th:text="#{magasinier.requests.manageRequests}">Manage Requests</h2>
+                    <p class="text-secondary mb-0" th:text="#{magasinier.requests.description}">See submitted stock requests.</p>
                 </div>
             </div>
 
@@ -22,16 +22,18 @@
                                     <i class="bi bi-search"></i>
                                 </span>
                                 <input type="text" class="form-control form-control-lg border-light bg-light ps-5 rounded-pill"
-                                       id="searchInput" placeholder="Search requests...">
+                                       id="searchInput" th:placeholder="#{magasinier.requests.search.placeholder}">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="d-flex justify-content-md-end gap-2">
                                 <select id="statusFilter" name="status" class="form-select form-select-lg border-light bg-light rounded-pill" style="max-width: 200px;">
-                                    <option value="">All statuses</option>
-                                    <option th:each="st : ${T(univ.StockManger.StockManger.entity.RequestStatus).values()}"
-                                            th:value="${st.name()}"
-                                            th:text="${st.name()}"></option>
+                                    <option value="" th:text="#{magasinier.requests.filter.allStatuses}">All statuses</option>
+                                    <option th:value="${T(univ.StockManger.StockManger.entity.RequestStatus).APPROVED.name()}"
+                                            th:text="#{magasinier.requests.status.approved}">APPROVED</option>
+                                    <option th:value="${T(univ.StockManger.StockManger.entity.RequestStatus).DELIVERED.name()}"
+                                            th:text="#{magasinier.requests.status.delivered}">DELIVERED</option>
+
                                 </select>
                             </div>
                         </div>
@@ -43,12 +45,12 @@
                         <table id="requestsTable" class="table table-hover align-middle mb-0">
                             <thead class="bg-light">
                             <tr class="text-muted text-uppercase small" style="letter-spacing: 0.5px;">
-                                <th class="ps-4 py-3">Request ID</th>
-                                <th class="py-3">Requester</th>
-                                <th class="py-3">Product</th>
-                                <th class="py-3">Quantity (Req / Stock)</th>
-                                <th class="py-3">Request State</th>
-                                <th class="py-3">Actions</th>
+                                <th class="ps-4 py-3" th:text="#{magasinier.requests.table.id}">Request ID</th>
+                                <th class="py-3" th:text="#{magasinier.requests.table.requester}">Requester</th>
+                                <th class="py-3" th:text="#{magasinier.requests.table.product}">Product</th>
+                                <th class="py-3" th:text="#{magasinier.requests.table.quantity}">Quantity (Req / Stock)</th>
+                                <th class="py-3" th:text="#{magasinier.requests.table.state}">Request State</th>
+                                <th class="py-3" th:text="#{magasinier.requests.table.actions}">Actions</th>
                             </tr>
                             </thead>
                         <tbody>
@@ -59,7 +61,7 @@
                                 <ul class="mb-0 list-unstyled" th:if="${!#lists.isEmpty(request.demande.lignes)}">
                                     <li th:each="line : ${request.demande.lignes}" th:text="${line.produit.nom}">Product Name</li>
                                 </ul>
-                                <span th:if="${#lists.isEmpty(request.demande.lignes)}" class="text-muted small">No products</span>
+                                <span th:if="${#lists.isEmpty(request.demande.lignes)}" class="text-muted small" th:text="#{magasinier.requests.table.noProducts}">No products</span>
                             </td>
                             <td>
                                 <ul class="mb-0 list-unstyled" th:if="${!#lists.isEmpty(request.demande.lignes)}">
@@ -75,45 +77,33 @@
                                 <span th:switch="${request.demande.etat_demande != null ? request.demande.etat_demande.name() : ''}">
                                     <span th:case="'APPROVED'" class="badge bg-info text-white">
                                         <i class="bi bi-check-lg me-1"></i>
-                                        <span th:text="${request.demande.etat_demande.name()}">APPROVED</span>
+                                        <span th:text="#{magasinier.requests.status.approved}">APPROVED</span>
                                     </span>
                                     <span th:case="'REJECTED'" class="badge bg-danger text-white">
                                         <i class="bi bi-x-lg me-1"></i>
-                                        <span th:text="${request.demande.etat_demande.name()}">REJECTED</span>
+                                        <span th:text="#{magasinier.requests.status.rejected}">REJECTED</span>
                                     </span>
                                     <span th:case="'PENDING'" class="badge bg-warning text-dark">
                                         <i class="bi bi-hourglass-split me-1"></i>
-                                        <span th:text="${request.demande.etat_demande.name()}">PENDING</span>
+                                        <span th:text="#{magasinier.requests.status.pending}">PENDING</span>
                                     </span>
                                     <span th:case="'DELIVERED'" class="badge bg-success text-white">
                                         <i class="bi bi-truck me-1"></i>
-                                        <span th:text="${request.demande.etat_demande.name()}">DELIVERED</span>
+                                        <span th:text="#{magasinier.requests.status.delivered}">DELIVERED</span>
                                     </span>
                                     <span th:case="*">
-                                        <span class="badge bg-secondary" th:text="${request.demande.etat_demande}">UNKNOWN</span>
+                                        <span class="badge bg-secondary" th:text="#{magasinier.requests.status.unknown}">UNKNOWN</span>
                                     </span>
                                 </span>
                             </td>
 
                             <td>
-<!--                                <div th:if="${request.demande.etat_demande != null and request.demande.etat_demande.name() == 'APPROVED'}">-->
-<!--                                    <form th:action="@{/magasinier/request/deliver/{id}(id=${request.demande.id})}" method="post" style="display:inline;">-->
-<!--                                        <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Mark this request as delivered?');">-->
-<!--                                            <i class="bi bi-truck me-1"></i> Mark as Delivered-->
-<!--                                        </button>-->
-<!--                                    </form>-->
-<!--                                </div>-->
                                 <div th:if="${request.demande.etat_demande != null and request.demande.etat_demande.name() == 'APPROVED'}">
                                     <form th:action="@{/magasinier/request/deliver/{id}(id=${request.demande.id})}" method="post" style="display:inline;">
-                                        <button type="submit" class="btn btn-sm btn-outline-success" onclick="return confirm('Mark this request as delivered?');">
-                                            <i class="bi bi-check-circle"></i> Confirm Delivery
+                                        <button type="submit" class="btn btn-sm btn-outline-success" th:attr="onclick='return confirm(\'' + #{magasinier.requests.confirm.delivery} + '\');'">
+                                            <i class="bi bi-check-circle"></i> <span th:text="#{magasinier.requests.button.confirmDelivery}">Confirm Delivery</span>
                                         </button>
                                     </form>
-<!--                                    <a th:href="@{/requester/request/confirm-delivery/{id}(id=${request.id})}"-->
-<!--                                       class="btn btn-sm btn-outline-success"-->
-<!--                                       onclick="return confirm('Confirm that you have received these items?');">-->
-<!--                                        <i class="bi bi-check-circle"></i> Confirm Delivery-->
-<!--                                    </a>-->
                                 </div>
                             </td>
                         </tr>
@@ -125,7 +115,7 @@
                 <div class="card-footer bg-white border-top border-light p-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="text-muted small">
-                            Rows per page:
+                            <span th:text="#{magasinier.requests.rowsPerPage}">Rows per page:</span>
                             <select id="pageSize-sg" class="form-select form-select-sm d-inline-block border-0 bg-light" style="width:auto;">
                                 <option value="5">5</option>
                                 <option value="10" selected>10</option>

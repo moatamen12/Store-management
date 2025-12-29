@@ -46,6 +46,9 @@ public class Demandes {
     @JoinColumn(name = "validated_by_id")
     private User validatedBy;
 
+    @OneToOne(mappedBy = "demande")
+    private Bon bon;
+
     @PrePersist
     private void prePersist() {
         if (etat_demande == null) {

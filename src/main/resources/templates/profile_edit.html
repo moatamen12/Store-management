@@ -2,26 +2,26 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragments/layout :: head"></head>
 <body>
-<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='Edit Your Profile')">
+<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle=#{profile.edit.title})">
     <div th:fragment="content">
 
         <div th:replace="fragments/layout :: alertMessage"></div>
-        <h3>Edit Profile</h3>
+        <h3 th:text="#{profile.edit.title}">Edit Profile</h3>
         <form th:action="@{/profile/edit}" th:object="${user}" method="post" class="row g-3" style="max-width:800px;">
             <div class="col-md-6">
-                <label class="form-label">First Name</label>
+                <label class="form-label" th:text="#{profile.first.name}">First Name</label>
                 <input name="prenom" class="form-control" required th:field="*{prenom}" />
                 <div th:if="${#fields.hasErrors('prenom')}" th:errors="*{prenom}" class="text-danger"></div>
             </div>
 
             <div class="col-md-6">
-                <label class="form-label">Last Name</label>
+                <label class="form-label" th:text="#{profile.last.name}">Last Name</label>
                 <input name="nom" class="form-control" required th:field="*{nom}" />
                 <div th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}" class="text-danger"></div>
             </div>
 
             <div class="col-md-6">
-                <label class="form-label">Email</label>
+                <label class="form-label" th:text="#{profile.email}">Email</label>
                 <input name="email" type="email" class="form-control" required th:field="*{email}" />
                 <div th:if="${emailError != null}" class="text-danger" th:text="${emailError}"></div>
                 <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger"></div>
@@ -29,9 +29,9 @@
 
             <!-- Current password (required only when changing password) -->
             <div class="col-md-6">
-                <label class="form-label">Current Password (required to change)</label>
+                <label class="form-label" th:text="#{profile.current.password}">Current Password (required to change)</label>
                 <div class="input-group">
-                    <input type="password" name="currentPassword" id="currentPassword" class="form-control" placeholder="Current password" />
+                    <input type="password" name="currentPassword" id="currentPassword" class="form-control" th:placeholder="#{profile.current.password.placeholder}" />
                     <button class="btn btn-info" type="button" id="toggleCurrentPassword">
                         <i class="bi bi-eye" id="toggleCurrentIcon"></i>
                     </button>
@@ -40,9 +40,9 @@
             </div>
 
             <div class="col-md-6">
-                <label class="form-label">New Password (leave blank to keep)</label>
+                <label class="form-label" th:text="#{profile.new.password}">New Password (leave blank to keep)</label>
                 <div class="input-group">
-                    <input type="password" id="password" name="password" class="form-control" placeholder="New password" th:field="*{password}" />
+                    <input type="password" id="password" name="password" class="form-control" th:placeholder="#{profile.new.password.placeholder}" th:field="*{password}" />
                     <button class="btn btn-info" type="button" id="togglePassword">
                         <i class="bi bi-eye" id="toggleIcon"></i>
                     </button>
@@ -51,8 +51,8 @@
             </div>
 
             <div class="col-12 text-end">
-                <button type="submit" class="btn btn-primary">Save</button>
-                <a th:href="@{/profile}" class="btn btn-danger">Cancel</a>
+                <button type="submit" class="btn btn-primary" th:text="#{button.save}">Save</button>
+                <a th:href="@{/profile}" class="btn btn-danger" th:text="#{button.cancel}">Cancel</a>
             </div>
         </form>
     </div>

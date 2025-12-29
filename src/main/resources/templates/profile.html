@@ -2,15 +2,15 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragments/layout :: head"></head>
 <body>
-<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='My Profile')">
+<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle=#{profile.title})">
     <div th:fragment="content">
 
         <div th:replace="fragments/layout :: alertMessage"></div>
 
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="fw-bold text-dark">My Profile</h2>
-                <p class="text-secondary mb-0">Manage your personal information and settings.</p>
+                <h2 class="fw-bold text-dark" th:text="#{profile.title}">My Profile</h2>
+                <p class="text-secondary mb-0" th:text="#{profile.description}">Manage your personal information and settings.</p>
             </div>
         </div>
 
@@ -31,26 +31,26 @@
                     </div>
                     <div class="ms-auto">
                         <a th:href="@{/profile/edit}" class="btn btn-outline-primary rounded-pill px-4">
-                            <i class="bi bi-pencil-square me-2"></i>Edit Profile
+                            <i class="bi bi-pencil-square me-2"></i><span th:text="#{profile.edit.button}">Edit Profile</span>
                         </a>
                     </div>
                 </div>
             </div>
 
             <div class="card-body p-4">
-                <h6 class="text-uppercase text-muted small fw-bold mb-4" style="letter-spacing: 0.5px;">Account Details</h6>
+                <h6 class="text-uppercase text-muted small fw-bold mb-4" style="letter-spacing: 0.5px;" th:text="#{profile.account.details}">Account Details</h6>
 
                 <div class="row g-4">
                     <div class="col-md-6">
-                        <label class="small text-secondary mb-1">First Name</label>
+                        <label class="small text-secondary mb-1" th:text="#{profile.first.name}">First Name</label>
                         <div class="fw-medium text-dark fs-5" th:text="${profileUser.prenom}">First</div>
                     </div>
                     <div class="col-md-6">
-                        <label class="small text-secondary mb-1">Last Name</label>
+                        <label class="small text-secondary mb-1" th:text="#{profile.last.name}">Last Name</label>
                         <div class="fw-medium text-dark fs-5" th:text="${profileUser.nom}">Last</div>
                     </div>
                     <div class="col-12">
-                        <label class="small text-secondary mb-1">Email Address</label>
+                        <label class="small text-secondary mb-1" th:text="#{profile.email}">Email Address</label>
                         <div class="d-flex align-items-center p-3 bg-light rounded-3 border border-light">
                             <i class="bi bi-envelope text-muted me-3 fs-5"></i>
                             <span class="fw-medium text-dark" th:text="${profileUser.email}">email@example.com</span>

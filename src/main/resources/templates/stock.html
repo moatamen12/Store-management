@@ -2,28 +2,29 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="fragments/layout :: head"></head>
 <body>
-<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle='Stock Management')">
+<div th:replace="fragments/layout :: main(content=~{::content}, pageTitle=#{page.title.stock})">
     <div th:fragment="content">
         <div th:replace="fragments/layout :: alertMessage"></div>
 
         <!-- Requester View -->
         <div sec:authorize="hasRole('DEMANDEUR')">
-            <h2>Available Products</h2>
+            <h2 th:text="#{stock.available.products}">Available Products</h2>
+            <p class="text-secondary mb-4 " th:text="#{stock.desc}"></p>
             <form class="mb-3 d-flex shadow-sm" method="get" th:action="@{/stock}">
-                <input type="text" name="search" class="form-control me-2" placeholder="Search by name"
+                <input type="text" name="search" class="form-control me-2" th:placeholder="#{stock.search.by.name}"
                        th:value="${search}">
-                <button type="submit" class="btn btn-primary">Search</button>
+                <button type="submit" class="btn btn-primary" th:text="#{button.search}">Search</button>
             </form>
 
             <form th:action="@{/requester/request}" method="post">
                 <table class="table table-bordered shadow-sm">
                     <thead>
                     <tr>
-                        <th>Select</th>
-                        <th>Name</th>
-                        <th>Quantity in Stock</th>
-                        <th>Unit Price</th>
-                        <th>Quantity to Request</th>
+                        <th th:text="#{stock.select}">Select</th>
+                        <th th:text="#{stock.name}">Name</th>
+                        <th th:text="#{stock.quantity.in.stock}">Quantity in Stock</th>
+                        <th th:text="#{stock.unit.price}">Unit Price</th>
+                        <th th:text="#{stock.quantity.to.request}">Quantity to Request</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -41,14 +42,14 @@
                     </tbody>
                 </table>
                 <div class="d-flex justify-content-between align-items-center">
-                    <button type="submit" class="btn btn-primary">Request Selected Products</button>
+                    <button type="submit" class="btn btn-primary" th:text="#{stock.request.selected.products}">Request Selected Products</button>
 
                     <!-- Pagination controls -->
                     <nav th:if="${totalPages > 1}">
                         <ul class="pagination">
                             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                                 <a class="page-link"
-                                   th:href="@{/stock(page=${currentPage - 1}, size=${size}, search=${search})}">Previous</a>
+                                   th:href="@{/stock(page=${currentPage - 1}, size=${size}, search=${search})}" th:text="#{pagination.previous}">Previous</a>
                             </li>
                             <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
                                 th:classappend="${i == currentPage} ? 'active'">
@@ -58,7 +59,7 @@
                             </li>
                             <li class="page-item" th:classappend="${currentPage == totalPages-1} ? 'disabled'">
                                 <a class="page-link"
-                                   th:href="@{/stock(page=${currentPage + 1}, size=${size}, search=${search})}">Next</a>
+                                   th:href="@{/stock(page=${currentPage + 1}, size=${size}, search=${search})}" th:text="#{pagination.next}">Next</a>
                             </li>
                         </ul>
                     </nav>
@@ -70,12 +71,12 @@
         <div sec:authorize="!hasRole('DEMANDEUR')">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h2 class="fw-bold text-dark">Stock Inventory</h2>
-                    <p class="text-secondary mb-0">View and monitor product stock levels.</p>
+                    <h2 class="fw-bold text-dark" th:text="#{stock.inventory.title}">Stock Inventory</h2>
+                    <p class="text-secondary mb-0" th:text="#{stock.inventory.description}">View and monitor product stock levels.</p>
                 </div>
                 <div sec:authorize="hasAnyRole('ADMIN', 'MAGASINIER', 'SG')">
                     <a th:href="@{/produits/add}" class="btn btn-primary fw-semibold">
-                        <i class="bi bi-plus-circle me-2"></i>Add New Product
+                        <i class="bi bi-plus-circle me-2"></i><span th:text="#{stock.add.new.product}">Add New Product</span>
                     </a>
                 </div>
             </div>
@@ -89,13 +90,13 @@
                                         <i class="bi bi-search"></i>
                                     </span>
                                 <input type="text" name="search" class="form-control form-control-lg border-light bg-light ps-5 rounded-pill"
-                                       placeholder="Search products..." th:value="${search}">
+                                       th:placeholder="#{stock.search.products}" th:value="${search}">
                             </form>
                         </div>
                         <div class="col-md-6 text-md-end">
                             <form th:action="@{/stock}" method="get" class="form-check form-switch form-check-inline">
                                 <input class="form-check-input" type="checkbox" name="lowStock" value="true" id="lowStockFilter" th:checked="${lowStock}" onchange="this.form.submit()">
-                                <label class="form-check-label" for="lowStockFilter">Show only low stock</label>
+                                <label class="form-check-label" for="lowStockFilter" th:text="#{stock.show.low.stock}">Show only low stock</label>
                             </form>
                         </div>
                     </div>
@@ -107,12 +108,12 @@
                             <thead class="bg-light">
                             <tr class="text-muted text-uppercase small" style="letter-spacing: 0.5px;">
                                 <th class="ps-4 py-3">ID</th>
-                                <th class="py-3">Product Name</th>
-                                <th class="py-3">Quantity</th>
-                                <th class="py-3">Alert Threshold</th>
-                                <th class="py-3">Unit Price</th>
-                                <th class="py-3">Status</th>
-                                <th class="py-3 text-end pe-4">Actions</th>
+                                <th class="py-3" th:text="#{stock.product.name}">Product Name</th>
+                                <th class="py-3" th:text="#{stock.quantity}">Quantity</th>
+                                <th class="py-3" th:text="#{stock.alert.threshold}">Alert Threshold</th>
+                                <th class="py-3" th:text="#{stock.unit.price}">Unit Price</th>
+                                <th class="py-3" th:text="#{stock.status}">Status</th>
+                                <th class="py-3 text-end pe-4" th:text="#{stock.actions}">Actions</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -123,8 +124,8 @@
                                 <td th:text="${product.seuilAlerte}">10</td>
                                 <td th:text="${product.prixUnitaire}"></td>
                                 <td>
-                                    <span th:if="${product.quantite <= product.seuilAlerte}" class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">Low Stock</span>
-                                    <span th:unless="${product.quantite <= product.seuilAlerte}" class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">In Stock</span>
+                                    <span th:if="${product.quantite <= product.seuilAlerte}" class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill" th:text="#{stock.low.stock}">Low Stock</span>
+                                    <span th:unless="${product.quantite <= product.seuilAlerte}" class="badge bg-success-subtle text-success border border-success-subtle rounded-pill" th:text="#{stock.in.stock}">In Stock</span>
                                 </td>
                                 <td class="text-end pe-4">
                                     <div sec:authorize="hasRole('MAGASINIER')">
@@ -134,7 +135,7 @@
                                         <form th:action="@{/produits/delete/{id}(id=${product.id})}" method="post" style="display: inline;">
                                             <button type="submit" class="btn btn-sm btn-outline-danger"
                                                     th:disabled="${productsWithActiveRequests.contains(product.id)}"
-                                                    th:title="${productsWithActiveRequests.contains(product.id)} ? 'This product is part of an active request and cannot be deleted.' : 'Delete product'">
+                                                    th:title="${productsWithActiveRequests.contains(product.id)} ? #{stock.delete.disabled.title} : #{stock.delete.title}">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
@@ -142,7 +143,7 @@
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(products)}">
-                                <td colspan="7" class="text-center py-4 text-muted">No products found in inventory.</td>
+                                <td colspan="7" class="text-center py-4 text-muted" th:text="#{stock.no.products.found}">No products found in inventory.</td>
                             </tr>
                             </tbody>
                         </table>
@@ -155,7 +156,7 @@
                         <ul class="pagination pagination-sm mb-0 gap-1">
                             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                                 <a class="page-link"
-                                   th:href="@{/stock(page=${currentPage - 1}, size=${size}, search=${search}, lowStock=${lowStock})}">Previous</a>
+                                   th:href="@{/stock(page=${currentPage - 1}, size=${size}, search=${search}, lowStock=${lowStock})}" th:text="#{pagination.previous}">Previous</a>
                             </li>
                             <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}"
                                 th:classappend="${i == currentPage} ? 'active'">
@@ -165,7 +166,7 @@
                             </li>
                             <li class="page-item" th:classappend="${currentPage == totalPages-1} ? 'disabled'">
                                 <a class="page-link"
-                                   th:href="@{/stock(page=${currentPage + 1}, size=${size}, search=${search}, lowStock=${lowStock})}">Next</a>
+                                   th:href="@{/stock(page=${currentPage + 1}, size=${size}, search=${search}, lowStock=${lowStock})}" th:text="#{pagination.next}">Next</a>
                             </li>
                         </ul>
                     </nav>
@@ -194,11 +195,3 @@
 </script>
 </body>
 </html>
-
-<!--TODO
-    BONE ENTRE SORTE
-    RAPORTE
-
-
-    PRODUCTE THRES HOLD
-    NOTIFICATIONS-->

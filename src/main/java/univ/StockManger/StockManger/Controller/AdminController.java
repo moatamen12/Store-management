@@ -30,7 +30,6 @@ public class AdminController {
 
     @GetMapping("/admin")
     public String adminDashboard(Model model, @ModelAttribute("success") String success, @ModelAttribute("error") String error) {
-        model.addAttribute("currentUser", currentUser().getPrenom() + " " + currentUser().getNom());
         model.addAttribute("users", userRepository.findAll());
         if (success != null && !success.isEmpty()) model.addAttribute("success", success);
         if (error != null && !error.isEmpty()) model.addAttribute("error", error);
