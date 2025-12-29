@@ -40,6 +40,7 @@ public class StockMangerApplication implements WebMvcConfigurer {
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/sg/**").hasAuthority("ROLE_SECRETAIRE_GENERAL")
                         .requestMatchers("/requester/**").hasAuthority("ROLE_DEMANDEUR")
+                        .requestMatchers("/magasinier/bons").hasAnyAuthority("ROLE_MAGASINIER", "ROLE_SECRETAIRE_GENERAL")
                         .requestMatchers("/magasinier/**").hasAuthority("ROLE_MAGASINIER")
                         .requestMatchers("/bon/**").hasAnyAuthority("ROLE_MAGASINIER", "ROLE_SECRETAIRE_GENERAL")
                         .anyRequest().authenticated()

@@ -10,10 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import univ.StockManger.StockManger.Repositories.BonRepository;
 import univ.StockManger.StockManger.entity.Bon;
-import univ.StockManger.StockManger.entity.ReceiptType;
 import univ.StockManger.StockManger.service.PdfService;
 
-import java.time.format.DateTimeFormatter;
+import java.io.IOException;
 
 @Controller
 public class BonController {
@@ -25,7 +24,7 @@ public class BonController {
     private PdfService pdfService;
 
     @GetMapping("/bon/{id}/pdf")
-    public ResponseEntity<byte[]> downloadBonPdf(@PathVariable Long id) throws DocumentException {
+    public ResponseEntity<byte[]> downloadBonPdf(@PathVariable Long id) throws DocumentException, IOException {
         Bon bon = bonRepository.findById(id).orElse(null);
         if (bon == null) {
             return ResponseEntity.notFound().build();
@@ -33,24 +32,14 @@ public class BonController {
 
         byte[] pdf = pdfService.generateBonPdf(bon);
 
-        String fileName;
-        if (bon.getType() == ReceiptType.EXIT) {
-            String date = bon.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            String requesterName = bon.getDemande().getDemandeur().getNom();
-            String magasinierName = bon.getMagasinier().getNom();
-            fileName = date + "_" + requesterName + "_" + magasinierName + ".pdf";
-        } else {
-            fileName = bon.getPdfPath();
-        }
-
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + bon.getPdfPath() + "\"")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
     }
 
     @GetMapping("/bon/{id}/view")
-    public ResponseEntity<byte[]> viewBonPdf(@PathVariable Long id) throws DocumentException {
+    public ResponseEntity<byte[]> viewBonPdf(@PathVariable Long id) throws DocumentException, IOException {
         Bon bon = bonRepository.findById(id).orElse(null);
         if (bon == null) {
             return ResponseEntity.notFound().build();

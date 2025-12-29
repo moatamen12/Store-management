@@ -120,12 +120,19 @@ public class MagasinierController {
             }
         }
 
+        DatabaseUserDetailsService.CustomUserDetails userDetails = (DatabaseUserDetailsService.CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User magasinier = userDetails.getUser();
+
+        String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String requesterName = demande.getDemandeur().getNom();
+        String fileName = date + "_" + requesterName + "_" + magasinier.getNom() + ".pdf";
+
         Bon bon = new Bon();
         bon.setDate(LocalDate.now());
         bon.setDemande(demande);
-        DatabaseUserDetailsService.CustomUserDetails userDetails = (DatabaseUserDetailsService.CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        bon.setMagasinier(userDetails.getUser());
+        bon.setMagasinier(magasinier);
         bon.setType(ReceiptType.EXIT);
+        bon.setPdfPath(fileName);
         bon = bonRepository.save(bon);
 
         List<LigneBon> lignesBon = new ArrayList<>();
