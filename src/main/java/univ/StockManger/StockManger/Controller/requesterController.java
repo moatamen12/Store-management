@@ -1,6 +1,7 @@
 package univ.StockManger.StockManger.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +24,7 @@ import univ.StockManger.StockManger.service.NotificationService;
 import java.security.Principal;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -37,6 +39,8 @@ public class requesterController {
     private UserRepository userRepository;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private MessageSource messageSource;
 
     @GetMapping("/requester")
     public String requesterDashboard(Model model, Principal principal) {
@@ -95,16 +99,17 @@ public class requesterController {
             @RequestParam(value = "selectedProducts", required = false) Long[] productIds,
             @RequestParam Map<String, String> allRequestParams,
             Principal principal,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            Locale locale) {
 
         if (productIds == null || productIds.length == 0) {
-            redirectAttributes.addFlashAttribute("error", "No products selected.");
+            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("request.error.noProductsSelected", null, locale));
             return "redirect:/stock";
         }
 
         User user = userRepository.findByEmail(principal.getName()).orElse(null);
         if (user == null) {
-            redirectAttributes.addFlashAttribute("error", "User not found.");
+            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("request.error.userNotFound", null, locale));
             return "redirect:/stock";
         }
 
@@ -119,17 +124,17 @@ public class requesterController {
             try {
                 requestedQty = Integer.parseInt(qtyStr);
             } catch (Exception e) {
-                redirectAttributes.addFlashAttribute("error", "Invalid quantity for product ID " + productId);
+                redirectAttributes.addFlashAttribute("error", messageSource.getMessage("request.error.invalidQuantity", new Object[]{productId}, locale));
                 return "redirect:/stock";
             }
 
             Produits product = produitsRepository.findById(productId).orElse(null);
             if (product == null) {
-                redirectAttributes.addFlashAttribute("error", "Product not found.");
+                redirectAttributes.addFlashAttribute("error", messageSource.getMessage("request.error.productNotFound", null, locale));
                 return "redirect:/stock";
             }
             if (requestedQty > product.getQuantite()) {
-                redirectAttributes.addFlashAttribute("error", "Requested quantity for " + product.getNom() + " exceeds available stock.");
+                redirectAttributes.addFlashAttribute("error", messageSource.getMessage("request.error.quantityExceedsStock", new Object[]{product.getNom()}, locale));
                 return "redirect:/stock";
             }
 
@@ -150,32 +155,32 @@ public class requesterController {
                     demande.getId(), secretary.getId());
         }
 
-        redirectAttributes.addFlashAttribute("success", "Request submitted successfully.");
+        redirectAttributes.addFlashAttribute("success", messageSource.getMessage("request.success.submitted", null, locale));
         return "redirect:/stock";
     }
 
     @Transactional
     @GetMapping("/requester/request/cancel/{id}")
-    public String cancelRequest(@PathVariable Long id, Principal principal, RedirectAttributes redirectAttributes) {
+    public String cancelRequest(@PathVariable Long id, Principal principal, RedirectAttributes redirectAttributes, Locale locale) {
         User user = userRepository.findByEmail(principal.getName()).orElse(null);
         if (user == null) {
-            redirectAttributes.addFlashAttribute("error", "User not found.");
+            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("request.error.userNotFound", null, locale));
             return "redirect:/requester/requests";
         }
 
         Demandes demande = demandesRepository.findById(id).orElse(null);
         if (demande == null || !demande.getDemandeur().getId().equals(user.getId())) {
-            redirectAttributes.addFlashAttribute("error", "Request not found or you don't have permission to cancel it.");
+            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("request.error.notFoundOrPermission", null, locale));
             return "redirect:/requester/requests";
         }
 
         if (demande.getEtat_demande() != RequestStatus.PENDING) {
-            redirectAttributes.addFlashAttribute("error", "Only pending requests can be canceled.");
+            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("request.error.onlyPendingCanBeCanceled", null, locale));
             return "redirect:/requester/requests";
         }
 
         demandesRepository.delete(demande);
-        redirectAttributes.addFlashAttribute("success", "Request canceled successfully.");
+        redirectAttributes.addFlashAttribute("success", messageSource.getMessage("request.success.canceled", null, locale));
         return "redirect:/requester/requests";
     }
 }

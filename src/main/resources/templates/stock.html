@@ -124,7 +124,7 @@
                                 <td th:text="${product.seuilAlerte}">10</td>
                                 <td th:text="${product.prixUnitaire}"></td>
                                 <td>
-                                    <span th:if="${product.quantite <= product.seuilAlerte}" class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill" th:text="#{stock.low.stock}">Low Stock</span>
+                                    <span th:if="${product.quantite <= product.seuilAlerte}" class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill" th:text="#{text.low.stock}">Low Stock</span>
                                     <span th:unless="${product.quantite <= product.seuilAlerte}" class="badge bg-success-subtle text-success border border-success-subtle rounded-pill" th:text="#{stock.in.stock}">In Stock</span>
                                 </td>
                                 <td class="text-end pe-4">

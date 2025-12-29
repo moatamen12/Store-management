@@ -1,6 +1,7 @@
 package univ.StockManger.StockManger.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -51,11 +53,13 @@ public class MagasinierController {
     private BonRepository bonRepository;
     @Autowired
     private LigneBonRepository ligneBonRepository;
+    @Autowired
+    private MessageSource messageSource;
 
     private static final String UPLOAD_DIR = "uploads/";
 
     @GetMapping("/magasinier")
-    public String dashboard(Model model) {
+    public String dashboard(Model model, Locale locale) {
         List<RequestStatus> statuses = Arrays.asList(RequestStatus.APPROVED, RequestStatus.PENDING);
         List<Demandes> acceptedRequests = demandesRepository.findTop10ByEtat_demandeInOrderByRequest_dateDesc(statuses, PageRequest.of(0, 10));
         List<Map<String, Object>> requestViews = acceptedRequests.stream().map(d -> {
@@ -63,7 +67,7 @@ public class MagasinierController {
             map.put("demande", d);
             String userName = (d.getDemandeur() != null)
                     ? d.getDemandeur().getNom() + " " + d.getDemandeur().getPrenom()
-                    : "deleted user";
+                    : messageSource.getMessage("user.deleted", null, locale);
             map.put("demandeurName", userName);
             return map;
         }).collect(Collectors.toList());
@@ -75,7 +79,8 @@ public class MagasinierController {
     @GetMapping("/magasinier/requests")
     public String requestsList(Model model,
                                @RequestParam(required = false) String success,
-                               @RequestParam(required = false) String error) {
+                               @RequestParam(required = false) String error,
+                               Locale locale) {
         if (success != null) {
             model.addAttribute("success", success);
         }
@@ -86,13 +91,13 @@ public class MagasinierController {
         DatabaseUserDetailsService.CustomUserDetails userDetails = (DatabaseUserDetailsService.CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User magasinier = userDetails.getUser();
         List<Demandes> allRequests = demandesRepository.findMagasinierRequests(magasinier);
-        
+
         List<Map<String, Object>> requestViews = allRequests.stream().map(d -> {
             Map<String, Object> map = new HashMap<>();
             map.put("demande", d);
             String userName = (d.getDemandeur() != null)
                     ? d.getDemandeur().getNom() + " " + d.getDemandeur().getPrenom()
-                    : "deleted user";
+                    : messageSource.getMessage("user.deleted", null, locale);
             map.put("demandeurName", userName);
             return map;
         }).collect(Collectors.toList());
@@ -102,24 +107,24 @@ public class MagasinierController {
     }
 
     @PostMapping("/magasinier/request/deliver/{id}")
-    public String deliverRequest(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String deliverRequest(@PathVariable Long id, RedirectAttributes redirectAttributes, Locale locale) {
         Demandes demande = demandesRepository.findById(id).orElse(null);
         if (demande == null) {
-            redirectAttributes.addFlashAttribute("error", "Request not found.");
-            return "redirect:/magasinier/requests";
+            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("request.error.notFound", null, locale));
+            return "redirect:/magasinier";
         }
 
         if (demande.getEtat_demande() != RequestStatus.APPROVED) {
-            redirectAttributes.addFlashAttribute("error", "Only approved requests can be marked as delivered.");
-            return "redirect:/magasinier/requests";
+            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("request.error.onlyApprovedCanBeDelivered", null, locale));
+            return "redirect:/magasinier";
         }
 
         for (LigneDemande ligne : demande.getLignes()) {
             Produits produit = ligne.getProduit();
             int quantiteDemandee = ligne.getQuantiteDemandee();
             if (produit.getQuantite() < quantiteDemandee) {
-                redirectAttributes.addFlashAttribute("error", "Insufficient stock for product: " + produit.getNom());
-                return "redirect:/magasinier/requests";
+                redirectAttributes.addFlashAttribute("error", messageSource.getMessage("request.error.insufficientStock", new Object[]{produit.getNom()}, locale));
+                return "redirect:/magasinier";
             }
         }
 
@@ -160,11 +165,11 @@ public class MagasinierController {
         // Notify the original requester that their request has been delivered
         if (demande.getDemandeur() != null) {
             notificationService.createNotification(this, NotificationType.REQUEST_DELIVERED,
-                    "Your request #" + demande.getId() + " has been delivered.",
+                    messageSource.getMessage("notification.request.delivered", new Object[]{demande.getId()}, locale),
                     demande.getId(), demande.getDemandeur().getId());
         }
 
-        redirectAttributes.addFlashAttribute("success", "Request marked as delivered.");
+        redirectAttributes.addFlashAttribute("success", messageSource.getMessage("request.success.delivered", null, locale));
         return "redirect:/magasinier/requests";
     }
 
@@ -175,15 +180,15 @@ public class MagasinierController {
     }
 
     @PostMapping("/magasinier/bon-entree")
-    public String createBonEntree(@RequestParam Long produitId, @RequestParam int quantite, @RequestParam("pdf") MultipartFile pdf, RedirectAttributes redirectAttributes) {
+    public String createBonEntree(@RequestParam Long produitId, @RequestParam int quantite, @RequestParam("pdf") MultipartFile pdf, RedirectAttributes redirectAttributes, Locale locale) {
         Produits produit = produitsRepository.findById(produitId).orElse(null);
         if (produit == null) {
-            redirectAttributes.addFlashAttribute("error", "Product not found.");
+            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("request.error.productNotFound", null, locale));
             return "redirect:/magasinier/bon-entree";
         }
 
         if (pdf.isEmpty()) {
-            redirectAttributes.addFlashAttribute("error", "Please upload a PDF file.");
+            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("bon.error.uploadPdf", null, locale));
             return "redirect:/magasinier/bon-entree";
         }
 
@@ -218,10 +223,10 @@ public class MagasinierController {
             produit.setQuantite(produit.getQuantite() + quantite);
             produitsRepository.save(produit);
 
-            redirectAttributes.addFlashAttribute("success", "Stock updated successfully.");
+            redirectAttributes.addFlashAttribute("success", messageSource.getMessage("stock.success.updated", null, locale));
         } catch (IOException e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "Failed to upload PDF.");
+            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("bon.error.failedToUpload", null, locale));
         }
 
         return "redirect:/magasinier/bon-entree";

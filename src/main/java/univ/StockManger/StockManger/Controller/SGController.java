@@ -1,5 +1,6 @@
 package univ.StockManger.StockManger.Controller;
 
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +21,12 @@ import univ.StockManger.StockManger.events.NotificationType;
 import univ.StockManger.StockManger.service.NotificationService;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
@@ -30,29 +36,31 @@ public class SGController {
     private final ProduitsRepository produitsRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final MessageSource messageSource;
 
-    public SGController(DemandesRepository demandesRepository, ProduitsRepository produitsRepository, UserRepository userRepository, NotificationService notificationService) {
+    public SGController(DemandesRepository demandesRepository, ProduitsRepository produitsRepository, UserRepository userRepository, NotificationService notificationService, MessageSource messageSource) {
         this.demandesRepository = demandesRepository;
         this.produitsRepository = produitsRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.messageSource = messageSource;
     }
 
     @GetMapping("/sg")
-    public String sgDashboard(Model model) {
+    public String sgDashboard(Model model, Locale locale) {
         List<Demandes> allRequests = demandesRepository.findAll();
         allRequests.forEach(d -> d.setLignes(d.getLignes().stream().filter(l -> l.getProduit() != null).collect(Collectors.toList())));
         List<Produits> allProducts = produitsRepository.findAll();
 
         long totalRequests = allRequests.size();
         long pendingRequests = allRequests.stream().filter(d -> d.getEtat_demande() == RequestStatus.PENDING).count();
-        
+
         List<Produits> lowStockProducts = allProducts.stream()
                 .filter(p -> p.getQuantite() <= p.getSeuilAlerte())
                 .toList();
-        
+
         long lowStockCount = lowStockProducts.size();
-        
+
         List<Produits> lowStockDisplay = lowStockProducts.stream()
                 .limit(5)
                 .toList();
@@ -68,14 +76,14 @@ public class SGController {
             map.put("demande", d);
             String userName = (d.getDemandeur() != null)
                     ? d.getDemandeur().getNom() + " " + d.getDemandeur().getPrenom()
-                    : "deleted user";
+                    : messageSource.getMessage("user.deleted", null, locale);
             map.put("demandeurName", userName);
-            
+
             double totalPrice = d.getLignes().stream()
                     .mapToDouble(l -> l.getQuantiteDemandee() * (l.getProduit() != null ? l.getProduit().getPrixUnitaire() : 0.0))
                     .sum();
             map.put("totalPrice", totalPrice);
-            
+
             return map;
         }).toList();
 
@@ -89,7 +97,7 @@ public class SGController {
     }
 
     @GetMapping("/sg/requests")
-    public String sgRequests(Model model){
+    public String sgRequests(Model model, Locale locale) {
         List<Demandes> requests = demandesRepository.findAll();
         requests.forEach(d -> d.setLignes(d.getLignes().stream().filter(l -> l.getProduit() != null).collect(Collectors.toList())));
         requests.sort(Comparator.comparing(d -> d.getEtat_demande() != RequestStatus.PENDING));
@@ -98,7 +106,7 @@ public class SGController {
             map.put("demande", d);
             String userName = (d.getDemandeur() != null)
                     ? d.getDemandeur().getNom() + " " + d.getDemandeur().getPrenom()
-                    : "deleted user";
+                    : messageSource.getMessage("user.deleted", null, locale);
             map.put("demandeurName", userName);
 
             double totalPrice = d.getLignes().stream()
@@ -113,38 +121,38 @@ public class SGController {
     }
 
     @PostMapping("/sg/update/{id}/approve")
-    public String approveRequest(@PathVariable Long id, 
+    public String approveRequest(@PathVariable Long id,
                                  @RequestParam(required = false) String returnUrl,
-                                 RedirectAttributes redirectAttributes){
+                                 RedirectAttributes redirectAttributes, Locale locale) {
         Optional<Demandes> opt = demandesRepository.findById(id);
-        if(opt.isPresent()){
+        if (opt.isPresent()) {
             Demandes demande = opt.get();
             demande.setEtat_demande(RequestStatus.APPROVED);
-            
+
             User currentUser = getCurrentUser();
             if (currentUser != null) {
                 demande.setValidatedBy(currentUser);
             }
-            
+
             demande.setValidation_date(LocalDate.now());
             demandesRepository.save(demande);
 
             // Notify the original requester
             if (demande.getDemandeur() != null) {
-                notificationService.createNotification(this, NotificationType.REQUEST_APPROVED, "Your request #" + demande.getId() + " has been approved.", demande.getId(), demande.getDemandeur().getId());
+                notificationService.createNotification(this, NotificationType.REQUEST_APPROVED, messageSource.getMessage("notification.request.approved", new Object[]{demande.getId()}, locale), demande.getId(), demande.getDemandeur().getId());
             }
 
             // Notify all storekeepers (magasiniers)
             List<User> magasiniers = userRepository.findAllByRole(Role.magasinier);
             for (User magasinier : magasiniers) {
                 notificationService.createNotification(this, NotificationType.REQUEST_APPROVED,
-                        "Request #" + demande.getId() + " has been approved and is ready for delivery.",
+                        messageSource.getMessage("notification.request.approved.for.delivery", new Object[]{demande.getId()}, locale),
                         demande.getId(), magasinier.getId());
             }
 
-            redirectAttributes.addFlashAttribute("success", "Request approved successfully.");
+            redirectAttributes.addFlashAttribute("success", messageSource.getMessage("request.success.approved", null, locale));
         } else {
-            redirectAttributes.addFlashAttribute("error", "Request not approved.");
+            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("request.error.notApproved", null, locale));
         }
         return "redirect:" + (returnUrl != null && !returnUrl.isEmpty() ? returnUrl : "/sg/requests");
     }
@@ -153,11 +161,11 @@ public class SGController {
     public String rejectRequest(@PathVariable Long id,
                                 @RequestParam(required = false, name = "commentaire") String commentaire,
                                 @RequestParam(required = false) String returnUrl,
-                                RedirectAttributes redirectAttributes){
+                                RedirectAttributes redirectAttributes, Locale locale) {
         Optional<Demandes> opt = demandesRepository.findById(id);
-        if(opt.isPresent()){
+        if (opt.isPresent()) {
             Demandes demande = opt.get();
-            
+
             if (demande.getEtat_demande() == RequestStatus.DELIVERED) {
                 for (LigneDemande ligne : demande.getLignes()) {
                     Produits produit = ligne.getProduit();
@@ -168,26 +176,26 @@ public class SGController {
             }
 
             demande.setEtat_demande(RequestStatus.REJECTED);
-            if(commentaire != null && !commentaire.trim().isEmpty()){
+            if (commentaire != null && !commentaire.trim().isEmpty()) {
                 demande.setCommentaire(commentaire);
             }
-            
+
             User currentUser = getCurrentUser();
             if (currentUser != null) {
                 demande.setValidatedBy(currentUser);
             }
-            
+
             demande.setValidation_date(LocalDate.now());
-            
+
             demandesRepository.save(demande);
 
             if (demande.getDemandeur() != null) {
-                notificationService.createNotification(this, NotificationType.REQUEST_REJECTED, "Your request #" + demande.getId() + " has been rejected.", demande.getId(), demande.getDemandeur().getId());
+                notificationService.createNotification(this, NotificationType.REQUEST_REJECTED, messageSource.getMessage("notification.request.rejected", new Object[]{demande.getId()}, locale), demande.getId(), demande.getDemandeur().getId());
             }
 
-            redirectAttributes.addFlashAttribute("success", "Request rejected successfully.");
+            redirectAttributes.addFlashAttribute("success", messageSource.getMessage("request.success.rejected", null, locale));
         } else {
-            redirectAttributes.addFlashAttribute("error", "Request not rejected.");
+            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("request.error.notRejected", null, locale));
         }
         return "redirect:" + (returnUrl != null && !returnUrl.isEmpty() ? returnUrl : "/sg/requests");
     }

@@ -1,6 +1,7 @@
 package univ.StockManger.StockManger.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +25,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Controller
@@ -40,6 +42,8 @@ public class ProduitController {
     private BonRepository bonRepository;
     @Autowired
     private LigneBonRepository ligneBonRepository;
+    @Autowired
+    private MessageSource messageSource;
 
     private static final String UPLOAD_DIR = "uploads/";
 
@@ -50,14 +54,14 @@ public class ProduitController {
     }
 
     @PostMapping("/add")
-    public String addProduct(@ModelAttribute("produit") Produits produit, @RequestParam("quantite") int quantite, @RequestParam("pdf") MultipartFile pdf, RedirectAttributes redirectAttributes, Authentication authentication) {
+    public String addProduct(@ModelAttribute("produit") Produits produit, @RequestParam("quantite") int quantite, @RequestParam("pdf") MultipartFile pdf, RedirectAttributes redirectAttributes, Authentication authentication, Locale locale) {
         if (authentication != null && authentication.isAuthenticated()) {
             boolean isMagasinier = authentication.getAuthorities().stream()
                     .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_MAGASINIER"));
 
             if (isMagasinier) {
                 if (pdf.isEmpty()) {
-                    redirectAttributes.addFlashAttribute("error", "Please upload a PDF file.");
+                    redirectAttributes.addFlashAttribute("error", messageSource.getMessage("bon.error.uploadPdf", null, locale));
                     return "redirect:/produits/add";
                 }
 
@@ -93,36 +97,36 @@ public class ProduitController {
                     ligneBon.setQuantite(quantite);
                     ligneBonRepository.save(ligneBon);
 
-                    checkLowStock(produit);
-                    redirectAttributes.addFlashAttribute("success", "Product added successfully.");
+                    checkLowStock(produit, locale);
+                    redirectAttributes.addFlashAttribute("success", messageSource.getMessage("product.add.success", null, locale));
                     return "redirect:/produits/add";
                 } catch (IOException e) {
                     e.printStackTrace();
-                    redirectAttributes.addFlashAttribute("error", "Failed to upload PDF.");
+                    redirectAttributes.addFlashAttribute("error", messageSource.getMessage("bon.error.failedToUpload", null, locale));
                 }
             } else {
-                redirectAttributes.addFlashAttribute("error", "You are not authorized to add products.");
+                redirectAttributes.addFlashAttribute("error", messageSource.getMessage("auth.error.notAuthorized", null, locale));
             }
         } else {
-            redirectAttributes.addFlashAttribute("error", "You must be logged in to perform this action.");
+            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("auth.error.mustBeLoggedIn", null, locale));
         }
         return "redirect:/login";
     }
 
     @GetMapping("/edit/{id}")
-    public String showUpdateForm(@PathVariable("id") long id, Model model, RedirectAttributes redirectAttributes) {
+    public String showUpdateForm(@PathVariable("id") long id, Model model, RedirectAttributes redirectAttributes, Locale locale) {
         Optional<Produits> produit = produitsRepository.findById(id);
         if (produit.isPresent()) {
             model.addAttribute("produit", produit.get());
             return "ModifyProducte";
         } else {
-            redirectAttributes.addFlashAttribute("error", "Invalid product Id:" + id);
+            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("product.error.invalidId", new Object[]{id}, locale));
             return "redirect:/stock";
         }
     }
 
     @PostMapping("/update/{id}")
-    public String updateProduit(@PathVariable("id") long id, @ModelAttribute("produit") Produits produit, RedirectAttributes redirectAttributes, Authentication authentication) {
+    public String updateProduit(@PathVariable("id") long id, @ModelAttribute("produit") Produits produit, RedirectAttributes redirectAttributes, Authentication authentication, Locale locale) {
         if (authentication != null && authentication.isAuthenticated()) {
             boolean isMagasinier = authentication.getAuthorities().stream()
                     .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_MAGASINIER"));
@@ -135,50 +139,50 @@ public class ProduitController {
                     existingProduit.setSeuilAlerte(produit.getSeuilAlerte());
                     existingProduit.setPrixUnitaire(produit.getPrixUnitaire());
                     existingProduit.setDescription(produit.getDescription());
-                    
+
                     produitsRepository.save(existingProduit);
-                    checkLowStock(existingProduit);
-                    redirectAttributes.addFlashAttribute("success", "Product updated successfully.");
+                    checkLowStock(existingProduit, locale);
+                    redirectAttributes.addFlashAttribute("success", messageSource.getMessage("product.update.success", null, locale));
                 } else {
-                    redirectAttributes.addFlashAttribute("error", "Product not found.");
+                    redirectAttributes.addFlashAttribute("error", messageSource.getMessage("product.error.notFound", null, locale));
                 }
             } else {
-                redirectAttributes.addFlashAttribute("error", "You are not authorized to update products.");
+                redirectAttributes.addFlashAttribute("error", messageSource.getMessage("auth.error.notAuthorized", null, locale));
             }
         } else {
-            redirectAttributes.addFlashAttribute("error", "You must be logged in to perform this action.");
+            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("auth.error.mustBeLoggedIn", null, locale));
         }
         return "redirect:/stock";
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteProduct(@PathVariable("id") Long id, RedirectAttributes redirectAttributes, Authentication authentication) {
+    public String deleteProduct(@PathVariable("id") Long id, RedirectAttributes redirectAttributes, Authentication authentication, Locale locale) {
         if (authentication != null && authentication.isAuthenticated()) {
             boolean isMagasinier = authentication.getAuthorities().stream()
                     .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_MAGASINIER"));
 
             if (isMagasinier) {
                 if (produitsRepository.countActiveRequestsForProductInStatus(id, Collections.singletonList(RequestStatus.PENDING)) > 0) {
-                    redirectAttributes.addFlashAttribute("error", "Cannot delete product because it is part of a pending request.");
+                    redirectAttributes.addFlashAttribute("error", messageSource.getMessage("product.delete.error.pendingRequest", null, locale));
                 } else {
                     produitsRepository.deleteById(id);
-                    redirectAttributes.addFlashAttribute("success", "Product deleted successfully.");
+                    redirectAttributes.addFlashAttribute("success", messageSource.getMessage("product.delete.success", null, locale));
                 }
             } else {
-                redirectAttributes.addFlashAttribute("error", "You are not authorized to delete products.");
+                redirectAttributes.addFlashAttribute("error", messageSource.getMessage("auth.error.notAuthorized", null, locale));
             }
         } else {
-            redirectAttributes.addFlashAttribute("error", "You must be logged in to perform this action.");
+            redirectAttributes.addFlashAttribute("error", messageSource.getMessage("auth.error.mustBeLoggedIn", null, locale));
         }
         return "redirect:/stock";
     }
 
-    private void checkLowStock(Produits produit) {
+    private void checkLowStock(Produits produit, Locale locale) {
         if (produit.getQuantite() <= produit.getSeuilAlerte()) {
             List<User> magasiniers = userRepository.findAllByRole(Role.magasinier);
             for (User magasinier : magasiniers) {
                 notificationService.createNotification(this, NotificationType.LOW_STOCK,
-                        "Product '" + produit.getNom() + "' is low in stock.",
+                        messageSource.getMessage("notification.lowStock", new Object[]{produit.getNom()}, locale),
                         produit.getId(), magasinier.getId());
             }
         }
