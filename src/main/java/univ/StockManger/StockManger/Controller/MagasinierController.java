@@ -16,10 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import univ.StockManger.StockManger.Repositories.BonRepository;
-import univ.StockManger.StockManger.Repositories.DemandesRepository;
-import univ.StockManger.StockManger.Repositories.LigneBonRepository;
-import univ.StockManger.StockManger.Repositories.ProduitsRepository;
+import univ.StockManger.StockManger.Repositories.*;
 import univ.StockManger.StockManger.entity.*;
 import univ.StockManger.StockManger.events.NotificationType;
 import univ.StockManger.StockManger.service.BonSpecification;
@@ -55,6 +52,8 @@ public class MagasinierController {
     private LigneBonRepository ligneBonRepository;
     @Autowired
     private MessageSource messageSource;
+    @Autowired
+    private RapportRepository rapportRepository;
 
     private static final String UPLOAD_DIR = "uploads/";
 
@@ -245,4 +244,26 @@ public class MagasinierController {
 
         return "bons";
     }
+
+    @GetMapping("/magasinier/reports")
+    public String magasinierReports(Model model,
+                                    @RequestParam(defaultValue = "0") int page,
+                                    @RequestParam(required = false) String keyword) {
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("dateGeneration").descending());
+        Page<Rapport> reportPage;
+
+        if (keyword != null && !keyword.isEmpty()) {
+            reportPage = rapportRepository.search(keyword, pageable);
+        } else {
+            reportPage = rapportRepository.findAll(pageable);
+        }
+
+        model.addAttribute("reports", reportPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", reportPage.getTotalPages());
+        model.addAttribute("keyword", keyword);
+        return "sg_reports";
+    }
+
 }

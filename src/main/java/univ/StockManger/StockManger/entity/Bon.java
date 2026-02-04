@@ -28,7 +28,7 @@ public class Bon {
     private ReceiptType type;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "demande_id", unique = true) // Removed nullable=false if not strictly required for all Bon types
+    @JoinColumn(name = "demande_id", unique = true)
     private Demandes demande;
 
     @ManyToOne(fetch = FetchType.LAZY)

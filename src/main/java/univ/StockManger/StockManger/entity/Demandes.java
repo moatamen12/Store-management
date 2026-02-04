@@ -20,7 +20,7 @@ public class Demandes {
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
 
-    // EAGER so the view can read demandeur fields without LazyInitializationException
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "demandeur_id", nullable = true)
     private User demandeur;
@@ -37,11 +37,9 @@ public class Demandes {
 
     private String commentaire;
 
-    // EAGER so the view can iterate lines and access nested product fields
     @OneToMany(mappedBy = "demande", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<LigneDemande> lignes = new ArrayList<>();
 
-    // EAGER to allow access to validator info in views without initializing proxy later
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "validated_by_id")
     private User validatedBy;

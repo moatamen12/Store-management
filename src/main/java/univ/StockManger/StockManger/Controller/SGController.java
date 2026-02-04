@@ -170,12 +170,12 @@ public class SGController {
             demande.setValidation_date(LocalDate.now());
             demandesRepository.save(demande);
 
-            // Notify the original requester
+            // notify the original requester
             if (demande.getDemandeur() != null) {
                 notificationService.createNotification(this, NotificationType.REQUEST_APPROVED, messageSource.getMessage("notification.request.approved", new Object[]{demande.getId()}, locale), demande.getId(), demande.getDemandeur().getId());
             }
 
-            // Notify all storekeepers (magasiniers)
+            // notify all magasiniers
             List<User> magasiniers = userRepository.findAllByRole(Role.magasinier);
             for (User magasinier : magasiniers) {
                 notificationService.createNotification(this, NotificationType.REQUEST_APPROVED,
@@ -271,7 +271,7 @@ public class SGController {
         return "redirect:/sg/reports";
     }
 
-    // UPDATED: This now generates a report for the CURRENT month for testing purposes
+    // generates a report for the CURRENT month for testing
     @GetMapping("/sg/generate-report")
     public String generateReport(RedirectAttributes redirectAttributes) {
         try {

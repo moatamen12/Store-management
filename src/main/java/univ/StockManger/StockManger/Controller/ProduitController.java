@@ -66,7 +66,7 @@ public class ProduitController {
                 }
 
                 try {
-                    // Create the uploads directory if it doesn't exist
+                    // create the uploads directory if it doesn't exist
                     Path uploadPath = Paths.get(UPLOAD_DIR);
                     if (!Files.exists(uploadPath)) {
                         Files.createDirectories(uploadPath);

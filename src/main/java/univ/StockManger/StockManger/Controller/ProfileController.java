@@ -63,7 +63,7 @@ public class ProfileController {
         user.setPrenom(formUser.getPrenom());
         user.setEmail(formUser.getEmail());
 
-        // update password only when provided (non-empty)
+        // update password only if text inp not empty
         if (formUser.getPassword() != null && !formUser.getPassword().isBlank()) {
             // require current password and validate it
             if (currentPassword == null || currentPassword.isBlank() || !passwordEncoder.matches(currentPassword, user.getPassword())) {
